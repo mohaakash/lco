@@ -1,10 +1,14 @@
 from openai import OpenAI
+import google.generativeai as genai
 import json, re
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 # ============================================================
 # 1. SINGLE, CLEAN PROMPT PER MODALITY (ALREADY REFINED)
@@ -213,18 +217,21 @@ def generate_modality_report(cardinal_pct, fixed_pct, mutable_pct):
 
     final_prompt = build_modality_prompt(cardinal_pct, fixed_pct, mutable_pct)
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system",
-             "content": "You MUST output only valid JSON. No markdown, no commentary, no extra text."},
-            {"role": "user", "content": final_prompt}
-        ],
-        temperature=0.4
+    system_instruction = (
+        "You MUST output only valid JSON. "
+        "No markdown, no commentary, no explanation — only pure JSON."
     )
 
-    raw_output = response.choices[0].message.content
+    # Gemini does NOT use role messages — merge system + content manually
+    full_prompt = system_instruction + "\n\n" + final_prompt
+
+    # Use your existing Gemini model
+    response = gemini_model.generate_content(full_prompt)
+
+    raw_output = response.text.strip()
+
     return extract_json(raw_output)
+
 
 
 # ============================================
