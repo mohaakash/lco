@@ -1,14 +1,15 @@
 from openai import OpenAI
+import google.generativeai as genai
 import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# ----------------------------
-# 1. YOUR PROMPT TEMPLATES
-# ----------------------------
+
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+
 
 # FIRE PROMPTS
 fire_low = """[SECTION: Element Overview]
@@ -552,22 +553,17 @@ Your task is to extract and reorganize the content into the following STRICT JSO
 """
 
     # Call OpenAI
-    response = client.chat.completions.create(
-        model="gpt-5",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": final_prompt}
-        ]
-    )
+    # Gemini requires a SINGLE STRING PROMPT  
+    prompt = system_prompt + "\n\nUSER INPUT:\n" + final_prompt
 
-    raw_output = response.choices[0].message.content
+    response = gemini_model.generate_content(prompt)
+
+    raw_output = response.text
     cleaned_output = clean_json_output(raw_output)
 
     try:
-        parsed = json.loads(cleaned_output)
-        return parsed
+        return json.loads(cleaned_output)
     except:
-        # Return raw cleaned text if not valid JSON (for debugging)
         return cleaned_output
     
 
@@ -630,16 +626,11 @@ Previous elemental analysis:
 Generate the structured JSON guideline now.
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        temperature=0.3,
-        messages=[
-            {"role": "system", "content": guideline_system_prompt},
-            {"role": "user", "content": final_user_prompt}
-        ]
-    )
+    prompt = guideline_system_prompt + "\n\n" + final_user_prompt
 
-    raw = response.choices[0].message.content
+    response = gemini_model.generate_content(prompt)
+
+    raw = response.text
     cleaned = clean_json_output(raw)
 
     try:
