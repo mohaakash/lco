@@ -142,11 +142,11 @@ class StepIndicator(QWidget):
         self.layout.setSpacing(0)
 
         self.steps_data = [
-            "Personal Details",
+            "Elemental Details",
             "Health History",
-            "Tax Details",
-            "Summary",
-            "Receipt"
+            "Elemental Assessment",
+            "Full Report",
+            "Export"
         ]
 
         for i, text in enumerate(self.steps_data, 1):

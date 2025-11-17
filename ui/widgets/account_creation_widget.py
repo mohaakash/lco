@@ -6,6 +6,8 @@ from ui.widgets.step_indicator import StepIndicator
 from ui.widgets.custom_input import CustomInput, PhoneInput, HelpIcon
 from ui.widgets.personal_details_form import PersonalDetailsForm
 from ui.widgets.health_history_form import HealthHistoryForm
+from ui.widgets.elemental_assessment_result_form import ElementalAssessmentResultForm
+from ai.ai import generate_elemental_report
 
 
 class AccountCreationWidget(QWidget):
@@ -36,9 +38,11 @@ class AccountCreationWidget(QWidget):
         # Add forms
         self.personal_details_form = PersonalDetailsForm()
         self.health_history_form = HealthHistoryForm()
+        self.elemental_assessment_form = ElementalAssessmentResultForm()
 
         self.stacked_widget.addWidget(self.personal_details_form)
         self.stacked_widget.addWidget(self.health_history_form)
+        self.stacked_widget.addWidget(self.elemental_assessment_form)
 
         # Connect next button from personal details
         self.personal_details_form.next_clicked.connect(
@@ -47,6 +51,10 @@ class AccountCreationWidget(QWidget):
             self.show_personal_details)
         self.health_history_form.next_clicked.connect(
             self.on_health_history_next)
+        self.elemental_assessment_form.back_clicked.connect(
+            self.show_health_history)
+        self.elemental_assessment_form.next_clicked.connect(
+            self.on_assessment_next)
 
         main_layout.addWidget(left_panel)
         main_layout.addWidget(self.stacked_widget)
@@ -69,7 +77,7 @@ class AccountCreationWidget(QWidget):
         layout.setSpacing(0)
 
         # DNB Logo
-        logo = QLabel("DNB")
+        logo = QLabel("ASTRO HEALTH - AI")
         logo.setStyleSheet("""
             QLabel {
                 color: #008B8B;
@@ -83,7 +91,7 @@ class AccountCreationWidget(QWidget):
         layout.addSpacing(20)
 
         # Create account title
-        title = QLabel("Create account")
+        title = QLabel("Your Elemental Balance Assessment")
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -112,9 +120,49 @@ class AccountCreationWidget(QWidget):
         self.stacked_widget.setCurrentIndex(1)
         self.step_indicator.set_active_step(2)
 
+    def show_assessment_result(self):
+        self.stacked_widget.setCurrentIndex(2)
+        self.step_indicator.set_active_step(3)
+
     def on_health_history_next(self):
-        print("Health history completed, moving to next step")
-        # Here you would proceed to step 3
+        """Generate AI assessment and show results"""
+        try:
+            # Extract elemental inputs from personal details form
+            fire = int(self.personal_details_form.fire_element.text() or 0)
+            earth = int(self.personal_details_form.earth_element.text() or 0)
+            air = int(self.personal_details_form.air_element.text() or 0)
+            water = int(self.personal_details_form.water_element.text() or 0)
+
+            # Prepare element data for AI
+            elements = {
+                "Fire": fire,
+                "Earth": earth,
+                "Air": air,
+                "Water": water
+            }
+
+            # Call AI function
+            assessment_data = generate_elemental_report(elements)
+
+            # Convert string response to dict if needed
+            if isinstance(assessment_data, str):
+                import json
+                assessment_data = json.loads(assessment_data)
+
+            # Load data into form
+            self.elemental_assessment_form.load_assessment_data(
+                assessment_data)
+
+            # Show assessment result form
+            self.show_assessment_result()
+
+        except Exception as e:
+            print(f"Error generating assessment: {e}")
+
+    def on_assessment_next(self):
+        """Handle next button on assessment form"""
+        print("Assessment completed, moving to next step")
+        # Here you would proceed to final step or completion
 
     def create_right_panel(self):
         panel = QWidget()
