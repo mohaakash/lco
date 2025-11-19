@@ -506,7 +506,7 @@ def generate_elemental_report(fire, earth, air, water):
 
     # Build the combined user prompt
     final_prompt = build_final_prompt(fire, earth, air, water)
-    print(final_prompt)
+    # print(final_prompt)
     # SYSTEM PROMPT (unchanged as requested)
     system_prompt = """
 You are AstraElements — a professional Astrological Health and Elemental Balance AI.
@@ -553,7 +553,7 @@ Your task is to extract and reorganize the content into the following STRICT JSO
 """
 
     # Call OpenAI
-    # Gemini requires a SINGLE STRING PROMPT  
+    # Gemini requires a SINGLE STRING PROMPT
     prompt = system_prompt + "\n\nUSER INPUT:\n" + final_prompt
 
     response = gemini_model.generate_content(prompt)
@@ -565,7 +565,7 @@ Your task is to extract and reorganize the content into the following STRICT JSO
         return json.loads(cleaned_output)
     except:
         return cleaned_output
-    
+
 
 def generate_daily_guideline(user_input, elemental_report):
     """
@@ -639,23 +639,22 @@ Generate the structured JSON guideline now.
         return cleaned
 
 
+# # ----------------------------
+# # 6. EXAMPLE CALL
+# # ----------------------------
+# user_input = {
+#     "fire": 32,
+#     "earth": 12,
+#     "air": 28,
+#     "water": 28
+# }
 
-# ----------------------------
-# 6. EXAMPLE CALL
-# ----------------------------
-user_input = {
-    "fire": 32,
-    "earth": 12,
-    "air": 28,
-    "water": 28
-}
+# first_report = generate_elemental_report(
+#     fire=32, earth=12, air=28, water=28
+# )
 
-first_report = generate_elemental_report(
-    fire=32, earth=12, air=28, water=28
-)
+# print(json.dumps(first_report, indent=2))
 
-print(json.dumps(first_report, indent=2))
+# daily_guideline = generate_daily_guideline(user_input, first_report)
 
-daily_guideline = generate_daily_guideline(user_input, first_report)
-
-print(json.dumps(daily_guideline, indent=2))
+# print(json.dumps(daily_guideline, indent=2))
