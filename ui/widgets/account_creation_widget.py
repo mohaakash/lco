@@ -5,11 +5,9 @@ from PyQt6.QtGui import QFont
 from ui.widgets.step_indicator import StepIndicator
 from ui.widgets.custom_input import CustomInput, PhoneInput, HelpIcon
 from ui.widgets.personal_details_form import PersonalDetailsForm
-from ui.widgets.health_history_form import HealthHistoryForm
 from ui.widgets.elemental_assessment_result_form import ElementalAssessmentResultForm
 from ui.widgets.pdf_preview_widget import PdfPreviewWidget
-from ai.elemental_assesment import generate_elemental_report, generate_daily_guideline
-from ai.elemental_quality import generate_modality_report
+from ai.complete_report import generate_complete_output
 import tempfile
 import os
 
@@ -158,27 +156,102 @@ class AccountCreationWidget(QWidget):
             fixed = int(pd.fixed_quality.text() or 0)
             mutable = int(pd.mutable_quality.text() or 0)
 
-            # Call AI functions
-            elemental_report = generate_elemental_report(
-                fire, earth, air, water)
-            modality_report = generate_modality_report(
-                cardinal, fixed, mutable)
-
-            # daily guideline uses user input and elemental report
-            try:
-                daily_guideline = generate_daily_guideline(
-                    {"fire": fire, "earth": earth, "air": air, "water": water}, elemental_report)
-            except Exception:
-                daily_guideline = {}
-
-            # Combine into a single payload for the result form
-            combined = {
-                "Elemental_Analysis": elemental_report if isinstance(elemental_report, dict) else {},
-                "Modalities": modality_report,
-                "Daily_Guideline": daily_guideline,
-                "Personal": personal,
-                "Summary": "AI generated assessment"
+            # Build user input for the single canonical report generator
+            user_input = {
+                "fire": int(fire),
+                "earth": int(earth),
+                "air": int(air),
+                "water": int(water),
+                "cardinal": int(cardinal),
+                "fixed": int(fixed),
+                "mutable": int(mutable),
             }
+
+            # Call the single full-report generator from ai/complete_report.py
+            try:
+                full_report = generate_complete_output(user_input)
+            except Exception as e:
+                print(f"Error calling complete_report: {e}")
+                full_report = {}
+
+            # Map AI output keys into the structure expected by the UI/template
+            # Template expects: Elemental_Analysis, Daily_Guideline, Modalities
+            elemental_src = full_report.get("Element_Descriptions", {}) or {}
+            elemental_map = {}
+            for ename, ed in elemental_src.items():
+                # ed may contain Title and Content (or Description). Put main text into Description
+                content = ed.get("Content") if isinstance(ed, dict) else ed
+                if not content:
+                    content = ed.get("Description") if isinstance(
+                        ed, dict) else ''
+                # Keep a light mapping so renderer/template can show the long block
+                elemental_map[ename] = {
+                    "Classification": ed.get("Title", "") if isinstance(ed, dict) else "",
+                    "Description": content,
+                    "Scientific_Correlation": "",
+                    "Imbalance_Effects": "",
+                    "Remedies": {}
+                }
+
+            # Daily routine -> template expects Daily_Guideline
+            daily_src = full_report.get("Daily_Routine", {}) or {}
+            # Modalities mapping
+            modalities_src = full_report.get("Modality_Descriptions", {}) or {}
+            modalities_map = {}
+            # Attach percentage values from the personal details qualities where applicable
+            try:
+                card_pct = int(cardinal)
+                fixed_pct = int(fixed)
+                mut_pct = int(mutable)
+            except Exception:
+                card_pct = fixed_pct = mut_pct = ""
+
+            for mname, mcontent in modalities_src.items():
+                pct = ''
+                if isinstance(mcontent, dict) and mcontent.get('Percentage'):
+                    pct = mcontent.get('Percentage')
+                # map user entered percentages for known modalities
+                if mname.lower().startswith('card'):
+                    pct = pct or card_pct
+                if mname.lower().startswith('fixed'):
+                    pct = pct or fixed_pct
+                if mname.lower().startswith('mut'):
+                    pct = pct or mut_pct
+
+                # keep any Title/Content as text fields
+                if isinstance(mcontent, dict):
+                    # merge into a dict so template can iterate keys
+                    mm = dict(mcontent)
+                    mm['Percentage'] = pct
+                    modalities_map[mname] = mm
+                else:
+                    modalities_map[mname] = {
+                        "Percentage": pct, "Content": mcontent}
+
+            # Element percentages (for display)
+            element_percentages = {
+                "Fire": fire,
+                "Earth": earth,
+                "Air": air,
+                "Water": water
+            }
+
+            combined = {
+                "Elemental_Analysis": elemental_map,
+                "Daily_Guideline": daily_src,
+                "Modalities": modalities_map,
+                "Element_Percentages": element_percentages,
+                "Modalities_Percentages": {"Cardinal": card_pct, "Fixed": fixed_pct, "Mutable": mut_pct},
+                "Personal": personal,
+                "Summary": full_report.get("Summary", "AI generated assessment")
+            }
+            # Also attach the raw generator output keys so the report renderer/template
+            # can access them directly if present.
+            combined["Element_Descriptions"] = full_report.get(
+                "Element_Descriptions", {})
+            combined["Daily_Routine"] = full_report.get("Daily_Routine", {})
+            combined["Modality_Descriptions"] = full_report.get(
+                "Modality_Descriptions", {})
 
             # Load into assessment form and show
             self.elemental_assessment_form.load_assessment_data(combined)

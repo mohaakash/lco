@@ -157,14 +157,39 @@
         <!-- ELEMENTAL ANALYSIS -->
         <div id="elemental" class="section">
             <h1>3. Elemental Analysis</h1>
-            {% set ea = Elemental_Analysis or Elemental_Analysis if Elemental_Analysis is defined else {} %}
+            {# Prefer generator keys Element_Descriptions, fall back to mapped Elemental_Analysis #}
+            {% set ea = Element_Descriptions if (Element_Descriptions is defined) else (Elemental_Analysis if
+            (Elemental_Analysis is defined) else {}) %}
+
+            {# Show element percentages if provided #}
+            {% set ep = Element_Percentages if (Element_Percentages is defined) else {} %}
+            {% if ep %}
+            <div style="margin-bottom:12px;">
+                <h3>Element Percentages</h3>
+                <p class="subtle">
+                    {% for k in ['Fire','Earth','Air','Water'] %}
+                    {% if ep.get(k) is defined %}
+                    <strong>{{ k }}:</strong> {{ ep.get(k) }}%&nbsp;&nbsp;
+                    {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+
             {% for el_name, el_data in ea.items() %}
+            {# support both generator shape {Title,Content} and legacy mapping with Description/Remedies #}
+            {% set title = el_data.get('Title') if (el_data is mapping) else '' %}
+            {% set description = (el_data.get('Content') if (el_data is mapping and el_data.get('Content')) else
+            el_data.get('Description') if (el_data is mapping) else (el_data if not (el_data is mapping) else '')) %}
+            {% set classification = el_data.get('Classification') if (el_data is mapping) else '' %}
             <div class="element-card" id="element-{{ el_name|replace(' ','-') }}">
-                <div class="element-title">{{ el_name }} &nbsp; <span class="small">{{ el_data.get('Classification','')
-                        }}</span></div>
-                {% if el_data.get('Description') %}
+                <div class="element-title">{{ el_name }} &nbsp; <span class="small">{{ classification }}</span></div>
+                {% if title %}
+                <h3>{{ title }}</h3>
+                {% endif %}
+                {% if description %}
                 <h3>Description</h3>
-                <div class="subtle">{{ el_data.get('Description') }}</div>
+                <div class="subtle">{{ description }}</div>
                 {% endif %}
 
                 {% if el_data.get('Scientific_Correlation') %}
@@ -204,7 +229,8 @@
         <!-- DAILY PLAN -->
         <div id="daily" class="section">
             <h1>4. Daily Plan</h1>
-            {% set dg = Daily_Guideline or {} %}
+            {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is
+            defined) else {}) %}
             {% for period, content in dg.items() %}
             <h2>{{ period }}</h2>
             {% if content is mapping %}
@@ -227,7 +253,8 @@
         <!-- ELEMENTAL QUALITY ASSESSMENT -->
         <div id="quality" class="section">
             <h1>5. Elemental Quality Assessment</h1>
-            {% set mods = Modalities or {} %}
+            {% set mods = Modality_Descriptions if (Modality_Descriptions is defined) else (Modalities if (Modalities is
+            defined) else {}) %}
             {% for mname, mcontent in mods.items() %}
             <div style="margin-bottom:12px;">
                 <h3>{{ mname }} {% if mcontent.get('Percentage') %}- <span class="small">{{ mcontent.get('Percentage')

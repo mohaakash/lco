@@ -26,11 +26,6 @@ High Cardinal:
 - Type-A tendencies: rushing, overcommitting, pushing limits.
 - May overwhelm others with force or intensity.
 
-Low Cardinal:
-- Difficulty initiating or taking action.
-- Low assertiveness, passivity, hesitation.
-- Weak engagement with external world.
-
 [SECTION: Physical Manifestations]
 Areas affected:
 - Chest, stomach, rib cage, head, kidneys, bones, gallbladder.
@@ -38,16 +33,11 @@ Areas affected:
 - Kidney or gallbladder weakness.
 - Impatience for healing or results.
 
-[SECTION: Remedies for Excess Cardinal]
+[SECTION: Remedies for Imbalance:]
 - Practices of introspection: meditation, reflection.
 - Inner-awareness physical arts: yoga, tai chi.
 - Crystals: amethyst, fluorite, sugilite.
 - Slowing down, pacing energy.
-
-[SECTION: Remedies for Low Cardinal]
-- Engage actively with people and challenges.
-- Martial arts (especially Aikido) to stimulate energy.
-- Crystals: carnelian, jasper, hematite, rhodochrosite, ruby, bloodstone.
 
 [SECTION: Summary Insight]
 Cardinal energy leads and initiates. Too much = pressure, impatience, burnout. Too little = stagnation and avoidance. Balance comes through pacing, mindful action, and body-mind integration.
@@ -60,11 +50,6 @@ High Fixed energy:
 - Strong willpower, dependable, consistent.
 - Difficulty adapting; resistance to new patterns.
 - Emotional and physical “holding.”
-
-Low Fixed energy:
-- Difficulty following through.
-- Weak discipline and low grounding.
-- Unstable routines or weak embodiment.
 
 [SECTION: Physical Manifestations]
 Excess Fixed:
@@ -104,11 +89,6 @@ High Mutable:
 - Difficulty relaxing; insomnia; overactivity.
 - Hypochondria tendencies.
 
-Low Mutable:
-- Rigid, crystallized thinking.
-- Poor adaptability.
-- Emotional stuckness.
-
 [SECTION: Physical Manifestations]
 High Mutable:
 - Lungs, intestines, nervous system, immune system sensitivity.
@@ -117,11 +97,6 @@ High Mutable:
 - Pancreas and lymphatic issues.
 - Sugar sensitivity; metabolic disorders; ulcers; headaches.
 
-Low Mutable:
-- Body stiffness.
-- Limited fluidity.
-- Emotional brittleness.
-
 [SECTION: Remedies for Excess Mutable]
 - Build concentration: yoga, tai chi, meditation, biofeedback.
 - Grounding practices: gardening, nature.
@@ -129,11 +104,6 @@ Low Mutable:
 - Immune-support foods: A, B, C vitamins, zinc.
 - Flower remedies: white chestnut, madia elegans, Shasta daisy, vervain, wild oat.
 - Crystals: green calcite, aventurine, chrysoprase, chrysocolla, malachite.
-
-[SECTION: Remedies for Low Mutable]
-- Flowing movement arts: tai chi, dance.
-- Flower essences: rock water, quaking grass, willow.
-- Crystals: rose quartz, kunzite, sugilite.
 
 [SECTION: Summary Insight]
 Mutable energy brings flexibility and integration. Excess scatters; deficiency hardens. Balance requires grounding, focus, rhythm, and emotional fluidity.

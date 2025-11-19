@@ -386,6 +386,7 @@ When lacking Mutable emphasis, you can become rigid and crystallized in your att
 # ELEMENT PROMPT SELECTORS
 # ============================================================
 
+
 def build_fire_prompt(v):
     if v == 0:
         return ""
@@ -428,6 +429,7 @@ def build_water_prompt(v):
 # TITLE EXTRACTOR
 # ============================================================
 
+
 def extract_title(text):
     lines = text.strip().split("\n")
     for line in lines:
@@ -447,6 +449,7 @@ def build_final_prompt(fire, earth, air, water):
     p += build_air_prompt(air) + "\n\n"
     p += build_water_prompt(water)
     return p.strip()
+
 
 def clean_json_output(text):
     text = text.replace("```json", "").replace("```", "")
@@ -573,7 +576,8 @@ def build_modality_descriptions(user_input):
     # Cardinal highest
     if cardinal == highest:
         t = extract_title(cardinal_description)
-        result["Cardinal"] = {"Title": t, "Content": cardinal_description.strip()}
+        result["Cardinal"] = {"Title": t,
+                              "Content": cardinal_description.strip()}
 
     # Fixed highest
     if fixed == highest:
@@ -583,7 +587,8 @@ def build_modality_descriptions(user_input):
     # Mutable highest
     if mutable == highest:
         t = extract_title(mutable_description)
-        result["Mutable"] = {"Title": t, "Content": mutable_description.strip()}
+        result["Mutable"] = {"Title": t,
+                             "Content": mutable_description.strip()}
 
     return result
 
@@ -613,16 +618,16 @@ def generate_complete_output(user_input):
 # TEST RUN
 # ============================================================
 
-user_values = {
-    "fire": 23,
-    "earth": 23,
-    "air": 18,
-    "water": 36,
-    "cardinal": 32,
-    "fixed": 18,
-    "mutable": 20
-}
+# user_values = {
+#     "fire": 23,
+#     "earth": 23,
+#     "air": 18,
+#     "water": 36,
+#     "cardinal": 32,
+#     "fixed": 18,
+#     "mutable": 20
+# }
 
-output = generate_complete_output(user_values)
+# output = generate_complete_output(user_values)
 
-print(json.dumps(output, indent=2))
+# print(json.dumps(output, indent=2))
