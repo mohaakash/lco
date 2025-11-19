@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 40px;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #222;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 36px;
+            color: #008B8B;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 24px;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 13px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #003b3b;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-top: 24px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-size: 14px;
+            margin-top: 14px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th,
+        td {
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .element-card {
+            border: 1px solid #e8e8e8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        /* Percentage badge and bar */
+        .badge {
+            display: inline-block;
+            background: #f0f8f8;
+            color: #003b3b;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        .progress-wrap {
+            background: #f3f7f7;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 10px;
+            width: 220px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff8a65, #ff5252);
+            width: 0%;
+        }
+
+        .element-title {
+            font-weight: 700;
+            color: #006b6b;
+        }
+
+        .subtle {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .toc li {
+            margin: 6px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="cover" id="cover">
+        <div class="title">Elemental Balance Assessment</div>
+        <div class="subtitle">Personalised wellness guidance</div>
+        <div class="meta">2025-11-19</div>
+        <div style="height:20px"></div>
+        <div class="meta">Generated for: <strong>Jane Doe</strong>
+        </div>
+    </div>
+    <div class="page-break"></div>
+
+    <div class="container">
+        <!-- PERSONAL DETAILS -->
+        <div id="personal" class="section">
+            <h1>1. Personal Details</h1>
+            
+            <p class="subtle">Name: <strong>Jane Doe</strong></p>
+            <p class="subtle">Date of Birth: 1990-01-01 &nbsp; Time: 06:30 &nbsp; Place: City, Country</p>
+            <p class="subtle">Phone: 1234567890 &nbsp; Email: jane@example.com</p>
+        </div>
+
+        <!-- TABLE OF CONTENTS -->
+        <div id="toc" class="section">
+            <h1>2. Table of Contents</h1>
+            <ol class="toc small">
+                <li><a href="#personal">1. Personal Details</a></li>
+                <li><a href="#elemental">2. Elemental Analysis</a></li>
+                <li><a href="#daily">3. Daily Plan</a></li>
+                <li><a href="#quality">4. Elemental Quality Assessment</a></li>
+            </ol>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- ELEMENTAL ANALYSIS -->
+        <div id="elemental" class="section">
+            <h1>3. Elemental Analysis</h1>
+            
+            
+
+            
+            
+            
+            <div style="margin-bottom:12px;">
+                <h3>Element Percentages</h3>
+                <p class="subtle">
+                    
+                    
+                    <strong>Fire:</strong>
+                    <span class="badge">35%</span>
+                    <span class="progress-wrap"><span class="progress-bar"
+                            style="width: 35%"></span></span>
+                    &nbsp;&nbsp;
+                    
+                    
+                    
+                    <strong>Earth:</strong>
+                    <span class="badge">20%</span>
+                    <span class="progress-wrap"><span class="progress-bar"
+                            style="width: 20%"></span></span>
+                    &nbsp;&nbsp;
+                    
+                    
+                    
+                    <strong>Air:</strong>
+                    <span class="badge">25%</span>
+                    <span class="progress-wrap"><span class="progress-bar"
+                            style="width: 25%"></span></span>
+                    &nbsp;&nbsp;
+                    
+                    
+                    
+                    <strong>Water:</strong>
+                    <span class="badge">20%</span>
+                    <span class="progress-wrap"><span class="progress-bar"
+                            style="width: 20%"></span></span>
+                    &nbsp;&nbsp;
+                    
+                    
+                </p>
+                
+                <div style="margin-top:8px;margin-bottom:6px;">
+                    <img src="data:image/png;base64,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" alt="element-chart"
+                        style="max-width:320px; height:auto; border-radius:6px; border:1px solid #eee;" />
+                </div>
+                
+            </div>
+            
+
+            
+            
+            
+            
+            
+            
+            <div class="element-card" id="element-Fire">
+                <div class="element-title">Fire
+                    
+                    &nbsp; - <span class="small">35%</span>
+                    
+                    
+                    &nbsp; <span class="small">(High)</span>
+                    
+                </div>
+                
+                <h3>The Fire Element</h3>
+                
+                
+                <h3>Description</h3>
+                <div class="subtle">Fire content goes here...</div>
+                
+
+                
+
+                
+
+                
+                
+            </div>
+            
+            
+            
+            
+            
+            
+            <div class="element-card" id="element-Earth">
+                <div class="element-title">Earth
+                    
+                    &nbsp; - <span class="small">20%</span>
+                    
+                    
+                    &nbsp; <span class="small">(Balanced)</span>
+                    
+                </div>
+                
+                <h3>The Earth Element</h3>
+                
+                
+                <h3>Description</h3>
+                <div class="subtle">Earth content goes here...</div>
+                
+
+                
+
+                
+
+                
+                
+            </div>
+            
+            
+            
+            
+            
+            
+            <div class="element-card" id="element-Air">
+                <div class="element-title">Air
+                    
+                    &nbsp; - <span class="small">25%</span>
+                    
+                    
+                    &nbsp; <span class="small">(Low)</span>
+                    
+                </div>
+                
+                <h3>The Air Element</h3>
+                
+                
+                <h3>Description</h3>
+                <div class="subtle">Air content goes here...</div>
+                
+
+                
+
+                
+
+                
+                
+            </div>
+            
+            
+            
+            
+            
+            
+            <div class="element-card" id="element-Water">
+                <div class="element-title">Water
+                    
+                    &nbsp; - <span class="small">20%</span>
+                    
+                    
+                    &nbsp; <span class="small">(Balanced)</span>
+                    
+                </div>
+                
+                <h3>The Water Element</h3>
+                
+                
+                <h3>Description</h3>
+                <div class="subtle">Water content goes here...</div>
+                
+
+                
+
+                
+
+                
+                
+            </div>
+            
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- DAILY PLAN -->
+        <div id="daily" class="section">
+            <h1>4. Daily Plan</h1>
+            
+            
+            <h2>Morning</h2>
+            
+            <table>
+                
+                <tr>
+                    <th>Diet</th>
+                    <td>Start with warm lemon water</td>
+                </tr>
+                
+                <tr>
+                    <th>Lifestyle</th>
+                    <td>Gentle stretching</td>
+                </tr>
+                
+                <tr>
+                    <th>Wear Clothing</th>
+                    <td>Light layers</td>
+                </tr>
+                
+                <tr>
+                    <th>Exercise</th>
+                    <td>Walk 20 minutes</td>
+                </tr>
+                
+            </table>
+            
+            
+            <h2>Midday</h2>
+            
+            <table>
+                
+                <tr>
+                    <th>Diet</th>
+                    <td>Balanced lunch</td>
+                </tr>
+                
+                <tr>
+                    <th>Lifestyle</th>
+                    <td>Short walk</td>
+                </tr>
+                
+                <tr>
+                    <th>Optional</th>
+                    <td>Rest 10 minutes</td>
+                </tr>
+                
+            </table>
+            
+            
+            <h2>Evening</h2>
+            
+            <table>
+                
+                <tr>
+                    <th>Diet</th>
+                    <td>Light soup</td>
+                </tr>
+                
+                <tr>
+                    <th>Lifestyle</th>
+                    <td>Relaxing bath</td>
+                </tr>
+                
+                <tr>
+                    <th>Exercise</th>
+                    <td>Light yoga</td>
+                </tr>
+                
+            </table>
+            
+            
+            <h2>Weekly_Addition</h2>
+            
+            <div class="subtle">One long outdoor walk on the weekend</div>
+            
+            
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- ELEMENTAL QUALITY ASSESSMENT -->
+        <div id="quality" class="section">
+            <h1>5. Elemental Quality Assessment</h1>
+            
+            
+
+            
+            <div style="margin-bottom:12px;">
+                <h3>Modalities Percentages</h3>
+                <p class="subtle">
+                    
+                    
+                    <strong>Cardinal:</strong> 50%&nbsp;&nbsp;
+                    
+                    
+                    
+                    <strong>Fixed:</strong> 30%&nbsp;&nbsp;
+                    
+                    
+                    
+                    <strong>Mutable:</strong> 20%&nbsp;&nbsp;
+                    
+                    
+                </p>
+            </div>
+            
+
+            
+            <div style="margin-bottom:12px;">
+                
+                <h3>Cardinal - <span class="small">50%</span></h3>
+                
+                <div class="subtle"><p><strong>Title:</strong> Cardinal Energy</p><p><strong>Content:</strong> Cardinal content...</p></div>
+                
+            </div>
+            
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- FOOTER / SUMMARY -->
+        <div class="section">
+            <h2>Summary</h2>
+            <div class="subtle">Top recommendations: increase warmth, moderate exercise, and regular sleep schedule.</div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -2,6 +2,9 @@ from openai import OpenAI
 import google.generativeai as genai
 import json
 import os
+import logging
+import time
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,6 +12,17 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+
+# module logger
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    # simple default handler if the application hasn't configured logging
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(name)s: %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 
 # FIRE PROMPTS
@@ -456,6 +470,51 @@ def clean_json_output(text):
     return text.strip()
 
 
+def _compute_percentages(values: dict) -> dict:
+    """Normalize numeric values into integer percentages that sum to 100.
+
+    values: mapping name->int
+    Returns: mapping name->int (0-100)
+    """
+    total = 0
+    for v in values.values():
+        try:
+            total += int(v)
+        except Exception:
+            continue
+    if total <= 0:
+        # avoid division by zero; return zeros
+        return {k: 0 for k in values.keys()}
+
+    raw = {k: int(v) for k, v in values.items()}
+    # compute proportional percentages, keep integer sum to 100
+    perc = {}
+    cumulative = 0
+    items = list(raw.items())
+    for i, (k, v) in enumerate(items):
+        if i == len(items) - 1:
+            # ensure sum is 100 by assigning remaining
+            perc[k] = 100 - cumulative
+        else:
+            p = int(round((v / total) * 100))
+            perc[k] = p
+            cumulative += p
+    return perc
+
+
+def _element_status(value: int) -> str:
+    """Return 'High', 'Low' or 'Balanced' using the same thresholds used elsewhere in this module."""
+    try:
+        v = int(value)
+    except Exception:
+        return "Balanced"
+    if v > 28:
+        return "High"
+    if v < 23:
+        return "Low"
+    return "Balanced"
+
+
 # ============================================================
 # DAILY ROUTINE GENERATION (GEMINI)
 # ============================================================
@@ -507,13 +566,32 @@ No text outside JSON.
 
     final_prompt = system_prompt + "\n\nUSER ELEMENT PROMPTS:\n" + element_prompt
 
-    response = gemini_model.generate_content(final_prompt)
-    cleaned = clean_json_output(response.text)
+    # call the model with a couple of retries and safe JSON parsing
+    cleaned = None
+    last_exc = None
+    for attempt in range(3):
+        try:
+            response = gemini_model.generate_content(final_prompt)
+            cleaned = clean_json_output(response.text)
+            # try parse
+            try:
+                parsed = json.loads(cleaned)
+                return parsed
+            except Exception as e:
+                # return structured fallback so caller can present raw output
+                logger.warning(
+                    "Daily routine JSON parse failed on attempt %s: %s", attempt + 1, e)
+                return {"__parse_error": True, "raw": cleaned}
+        except Exception as exc:
+            last_exc = exc
+            logger.error(
+                "generate_daily_routine attempt %s failed: %s", attempt + 1, exc)
+            time.sleep(1 * (attempt + 1))
 
-    try:
-        return json.loads(cleaned)
-    except:
-        return cleaned
+    # all retries failed
+    logger.exception(
+        "generate_daily_routine: all retries failed: %s", last_exc)
+    return {"__error": True, "error_message": str(last_exc)}
 
 
 # ============================================================
@@ -525,36 +603,83 @@ def build_descriptions_json(user_input):
     earth = int(user_input["earth"])
     air = int(user_input["air"])
     water = int(user_input["water"])
+    # compute percentages for the four elements (sums to 100)
+    raw_vals = {"Fire": fire, "Earth": earth, "Air": air, "Water": water}
+    percentages = _compute_percentages(raw_vals)
 
     result = {}
 
-    if fire > 28:
+    # Fire
+    status = _element_status(fire)
+    if status == "High":
         title = extract_title(fire_high_fixed)
-        result["Fire"] = {"Title": title, "Content": fire_high_fixed.strip()}
-    if fire < 23:
+        content = fire_high_fixed.strip()
+    elif status == "Low":
         title = extract_title(fire_low_fixed)
-        result["Fire"] = {"Title": title, "Content": fire_low_fixed.strip()}
+        content = fire_low_fixed.strip()
+    else:
+        title = "Fire"
+        content = "Fire appears balanced based on the input; no corrective fixed text applies."
+    result["Fire"] = {
+        "Title": title,
+        "Content": content,
+        "Status": status,
+        "Percentage": percentages.get("Fire", 0),
+    }
 
-    if earth > 28:
+    # Earth
+    status = _element_status(earth)
+    if status == "High":
         title = extract_title(earth_high_fixed)
-        result["Earth"] = {"Title": title, "Content": earth_high_fixed.strip()}
-    if earth < 23:
+        content = earth_high_fixed.strip()
+    elif status == "Low":
         title = extract_title(earth_low_fixed)
-        result["Earth"] = {"Title": title, "Content": earth_low_fixed.strip()}
+        content = earth_low_fixed.strip()
+    else:
+        title = "Earth"
+        content = "Earth appears balanced based on the input; no corrective fixed text applies."
+    result["Earth"] = {
+        "Title": title,
+        "Content": content,
+        "Status": status,
+        "Percentage": percentages.get("Earth", 0),
+    }
 
-    if air > 28:
+    # Air
+    status = _element_status(air)
+    if status == "High":
         title = extract_title(air_high_fixed)
-        result["Air"] = {"Title": title, "Content": air_high_fixed.strip()}
-    if air < 23:
+        content = air_high_fixed.strip()
+    elif status == "Low":
         title = extract_title(air_low_fixed)
-        result["Air"] = {"Title": title, "Content": air_low_fixed.strip()}
+        content = air_low_fixed.strip()
+    else:
+        title = "Air"
+        content = "Air appears balanced based on the input; no corrective fixed text applies."
+    result["Air"] = {
+        "Title": title,
+        "Content": content,
+        "Status": status,
+        "Percentage": percentages.get("Air", 0),
+    }
 
-    if water > 28:
+    # Water
+    status = _element_status(water)
+    if status == "High":
         title = extract_title(water_high_fixed)
-        result["Water"] = {"Title": title, "Content": water_high_fixed.strip()}
-    if water < 23:
+        content = water_high_fixed.strip()
+    elif status == "Low":
         title = extract_title(water_low_fixed)
-        result["Water"] = {"Title": title, "Content": water_low_fixed.strip()}
+        content = water_low_fixed.strip()
+    else:
+        title = "Water"
+        content = "Water appears balanced based on the input; no corrective fixed text applies."
+    result["Water"] = {
+        "Title": title,
+        "Content": content,
+        "Status": status,
+        "Percentage": percentages.get("Water", 0),
+    }
 
     return result
 
@@ -597,18 +722,53 @@ def build_modality_descriptions(user_input):
 # MASTER FUNCTION — FINAL OUTPUT
 # ============================================================
 
-def generate_complete_output(user_input):
+def generate_complete_output(user_input) -> dict:
+    """Generate the complete report JSON for the provided user_input.
 
+    The returned dict includes at minimum:
+      - GeneratedAt (ISO UTC)
+      - Personal input echoed under 'Input' (if present)
+      - Element_Descriptions (Title, Content, Status, Percentage)
+      - Element_Percentages (mapping)
+      - Daily_Routine (parsed JSON from Gemini or a parse-fallback)
+      - Modality_Descriptions
+      - Modalities_Percentages
+
+    The function is defensive: LLM JSON parse errors will be returned as structured fallbacks.
+    """
+
+    # prepare descriptions and percentages
     element_descriptions = build_descriptions_json(user_input)
 
     modality_descriptions = build_modality_descriptions(user_input)
 
+    # compute modality percentages
+    try:
+        cardinal = int(user_input.get("cardinal", 0))
+        fixed = int(user_input.get("fixed", 0))
+        mutable = int(user_input.get("mutable", 0))
+    except Exception:
+        cardinal = fixed = mutable = 0
+
+    modalities_raw = {"Cardinal": cardinal, "Fixed": fixed, "Mutable": mutable}
+    modalities_percent = _compute_percentages(modalities_raw)
+
+    # generate daily routine (may return parsed dict or structured fallback)
     daily_routine = generate_daily_routine(user_input)
 
+    # also produce a simple Element_Percentages mapping (from the descriptions entries)
+    element_percentages = {
+        k: v.get("Percentage", 0) for k, v in element_descriptions.items()
+    }
+
     final_json = {
+        "GeneratedAt": datetime.utcnow().isoformat() + "Z",
+        "Input": user_input,
         "Element_Descriptions": element_descriptions,
+        "Element_Percentages": element_percentages,
         "Daily_Routine": daily_routine,
-        "Modality_Descriptions": modality_descriptions
+        "Modality_Descriptions": modality_descriptions,
+        "Modalities_Percentages": modalities_percent,
     }
 
     return final_json

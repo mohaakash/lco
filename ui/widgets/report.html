@@ -101,6 +101,34 @@
             margin-bottom: 12px;
         }
 
+        /* Percentage badge and bar */
+        .badge {
+            display: inline-block;
+            background: #f0f8f8;
+            color: #003b3b;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+
+        .progress-wrap {
+            background: #f3f7f7;
+            border-radius: 6px;
+            overflow: hidden;
+            height: 10px;
+            width: 220px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff8a65, #ff5252);
+            width: 0%;
+        }
+
         .element-title {
             font-weight: 700;
             color: #006b6b;
@@ -169,10 +197,20 @@
                 <p class="subtle">
                     {% for k in ['Fire','Earth','Air','Water'] %}
                     {% if ep.get(k) is defined %}
-                    <strong>{{ k }}:</strong> {{ ep.get(k) }}%&nbsp;&nbsp;
+                    <strong>{{ k }}:</strong>
+                    <span class="badge">{{ ep.get(k) }}%</span>
+                    <span class="progress-wrap"><span class="progress-bar"
+                            style="width: {{ ep.get(k) }}%"></span></span>
+                    &nbsp;&nbsp;
                     {% endif %}
                     {% endfor %}
                 </p>
+                {% if element_chart_png %}
+                <div style="margin-top:8px;margin-bottom:6px;">
+                    <img src="data:image/png;base64,{{ element_chart_png }}" alt="element-chart"
+                        style="max-width:320px; height:auto; border-radius:6px; border:1px solid #eee;" />
+                </div>
+                {% endif %}
             </div>
             {% endif %}
 
@@ -181,9 +219,18 @@
             {% set title = el_data.get('Title') if (el_data is mapping) else '' %}
             {% set description = (el_data.get('Content') if (el_data is mapping and el_data.get('Content')) else
             el_data.get('Description') if (el_data is mapping) else (el_data if not (el_data is mapping) else '')) %}
-            {% set classification = el_data.get('Classification') if (el_data is mapping) else '' %}
+            {% set status = el_data.get('Status') if (el_data is mapping) else '' %}
+            {% set pct = el_data.get('Percentage') if (el_data is mapping and el_data.get('Percentage') is not none)
+            else (ep.get(el_name) if ep.get(el_name) is defined else None) %}
             <div class="element-card" id="element-{{ el_name|replace(' ','-') }}">
-                <div class="element-title">{{ el_name }} &nbsp; <span class="small">{{ classification }}</span></div>
+                <div class="element-title">{{ el_name }}
+                    {% if pct is not none %}
+                    &nbsp; - <span class="small">{{ pct }}%</span>
+                    {% endif %}
+                    {% if status %}
+                    &nbsp; <span class="small">({{ status }})</span>
+                    {% endif %}
+                </div>
                 {% if title %}
                 <h3>{{ title }}</h3>
                 {% endif %}
@@ -255,10 +302,26 @@
             <h1>5. Elemental Quality Assessment</h1>
             {% set mods = Modality_Descriptions if (Modality_Descriptions is defined) else (Modalities if (Modalities is
             defined) else {}) %}
+            {% set mp = Modalities_Percentages if (Modalities_Percentages is defined) else {} %}
+
+            {% if mp %}
+            <div style="margin-bottom:12px;">
+                <h3>Modalities Percentages</h3>
+                <p class="subtle">
+                    {% for k in ['Cardinal','Fixed','Mutable'] %}
+                    {% if mp.get(k) is defined %}
+                    <strong>{{ k }}:</strong> {{ mp.get(k) }}%&nbsp;&nbsp;
+                    {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+
             {% for mname, mcontent in mods.items() %}
             <div style="margin-bottom:12px;">
-                <h3>{{ mname }} {% if mcontent.get('Percentage') %}- <span class="small">{{ mcontent.get('Percentage')
-                        }}%</span>{% endif %}</h3>
+                {% set mpct = mp.get(mname) if mp.get(mname) is defined else (mcontent.get('Percentage') if (mcontent is
+                mapping and mcontent.get('Percentage') is defined) else None) %}
+                <h3>{{ mname }} {% if mpct %}- <span class="small">{{ mpct }}%</span>{% endif %}</h3>
                 {% if mcontent is mapping %}
                 <div class="subtle">{% for k,v in mcontent.items() if k!='Percentage' %}<p><strong>{{ k.replace('_',' ')
                             }}:</strong> {{ v }}</p>{% endfor %}</div>
