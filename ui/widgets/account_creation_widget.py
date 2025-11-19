@@ -7,7 +7,11 @@ from ui.widgets.custom_input import CustomInput, PhoneInput, HelpIcon
 from ui.widgets.personal_details_form import PersonalDetailsForm
 from ui.widgets.health_history_form import HealthHistoryForm
 from ui.widgets.elemental_assessment_result_form import ElementalAssessmentResultForm
-from ai.ai import generate_elemental_report
+from ui.widgets.pdf_preview_widget import PdfPreviewWidget
+from ai.elemental_assesment import generate_elemental_report, generate_daily_guideline
+from ai.elemental_quality import generate_modality_report
+import tempfile
+import os
 
 
 class AccountCreationWidget(QWidget):
@@ -35,26 +39,32 @@ class AccountCreationWidget(QWidget):
         self.stacked_widget = QStackedWidget()
         self.stacked_widget.setStyleSheet("background-color: white;")
 
-        # Add forms
+        # Add forms: Personal Details and Elemental Assessment Result.
+        # Note: Health history form exists in the codebase but is not added to
+        # the UI flow for this client demo per request.
         self.personal_details_form = PersonalDetailsForm()
-        self.health_history_form = HealthHistoryForm()
         self.elemental_assessment_form = ElementalAssessmentResultForm()
+        self.pdf_preview = PdfPreviewWidget()
 
         self.stacked_widget.addWidget(self.personal_details_form)
-        self.stacked_widget.addWidget(self.health_history_form)
         self.stacked_widget.addWidget(self.elemental_assessment_form)
+        # PDF preview page sits after the assessment result
+        self.stacked_widget.addWidget(self.pdf_preview)
 
-        # Connect next button from personal details
+        # Connect next button from personal details to generate AI reports
         self.personal_details_form.next_clicked.connect(
-            self.show_health_history)
-        self.health_history_form.back_clicked.connect(
-            self.show_personal_details)
-        self.health_history_form.next_clicked.connect(
-            self.on_health_history_next)
+            self.on_personal_details_next)
+        # Allow returning to personal details from assessment
         self.elemental_assessment_form.back_clicked.connect(
-            self.show_health_history)
+            self.show_personal_details)
         self.elemental_assessment_form.next_clicked.connect(
             self.on_assessment_next)
+        # When report requests export, generate PDF and show preview
+        self.elemental_assessment_form.export_requested.connect(
+            self.on_export_requested)
+
+        # Close on preview returns to personal details
+        self.pdf_preview.closed.connect(self.show_personal_details)
 
         main_layout.addWidget(left_panel)
         main_layout.addWidget(self.stacked_widget)
@@ -77,7 +87,7 @@ class AccountCreationWidget(QWidget):
         layout.setSpacing(0)
 
         # DNB Logo
-        logo = QLabel("ASTRO HEALTH - AI")
+        logo = QLabel("ASTRO HEALTH")
         logo.setStyleSheet("""
             QLabel {
                 color: #008B8B;
@@ -91,7 +101,7 @@ class AccountCreationWidget(QWidget):
         layout.addSpacing(20)
 
         # Create account title
-        title = QLabel("Your Elemental Balance Assessment")
+        title = QLabel("Elemental Balance Assessment")
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -116,53 +126,104 @@ class AccountCreationWidget(QWidget):
         self.stacked_widget.setCurrentIndex(0)
         self.step_indicator.set_active_step(1)
 
-    def show_health_history(self):
+    def show_assessment_result(self):
+        # assessment is index 1 now
         self.stacked_widget.setCurrentIndex(1)
         self.step_indicator.set_active_step(2)
 
-    def show_assessment_result(self):
-        self.stacked_widget.setCurrentIndex(2)
-        self.step_indicator.set_active_step(3)
-
-    def on_health_history_next(self):
-        """Generate AI assessment and show results"""
+    def on_personal_details_next(self):
+        """Collect personal details and elemental inputs, call AI functions,
+        and show the assessment result page."""
         try:
-            # Extract elemental inputs from personal details form
-            fire = int(self.personal_details_form.fire_element.text() or 0)
-            earth = int(self.personal_details_form.earth_element.text() or 0)
-            air = int(self.personal_details_form.air_element.text() or 0)
-            water = int(self.personal_details_form.water_element.text() or 0)
+            pd = self.personal_details_form
 
-            # Prepare element data for AI
-            elements = {
-                "Fire": fire,
-                "Earth": earth,
-                "Air": air,
-                "Water": water
+            # Personal identity/contact
+            personal = {
+                "name": pd.full_name.text(),
+                "date_of_birth": pd.date_of_birth.text(),
+                "time_of_birth": pd.time_of_birth.text(),
+                "place_of_birth": pd.place_of_birth.text(),
+                "phone": pd.phone.text(),
+                "email": pd.email.text(),
             }
 
-            # Call AI function
-            assessment_data = generate_elemental_report(elements)
+            # Element percentages
+            fire = int(pd.fire_element.text() or 0)
+            earth = int(pd.earth_element.text() or 0)
+            air = int(pd.air_element.text() or 0)
+            water = int(pd.water_element.text() or 0)
 
-            # Convert string response to dict if needed
-            if isinstance(assessment_data, str):
-                import json
-                assessment_data = json.loads(assessment_data)
+            # Qualities
+            cardinal = int(pd.cardinal_quality.text() or 0)
+            fixed = int(pd.fixed_quality.text() or 0)
+            mutable = int(pd.mutable_quality.text() or 0)
 
-            # Load data into form
-            self.elemental_assessment_form.load_assessment_data(
-                assessment_data)
+            # Call AI functions
+            elemental_report = generate_elemental_report(
+                fire, earth, air, water)
+            modality_report = generate_modality_report(
+                cardinal, fixed, mutable)
 
-            # Show assessment result form
+            # daily guideline uses user input and elemental report
+            try:
+                daily_guideline = generate_daily_guideline(
+                    {"fire": fire, "earth": earth, "air": air, "water": water}, elemental_report)
+            except Exception:
+                daily_guideline = {}
+
+            # Combine into a single payload for the result form
+            combined = {
+                "Elemental_Analysis": elemental_report if isinstance(elemental_report, dict) else {},
+                "Modalities": modality_report,
+                "Daily_Guideline": daily_guideline,
+                "Personal": personal,
+                "Summary": "AI generated assessment"
+            }
+
+            # Load into assessment form and show
+            self.elemental_assessment_form.load_assessment_data(combined)
             self.show_assessment_result()
 
         except Exception as e:
-            print(f"Error generating assessment: {e}")
+            print(f"Error generating AI assessment: {e}")
 
     def on_assessment_next(self):
         """Handle next button on assessment form"""
-        print("Assessment completed, moving to next step")
-        # Here you would proceed to final step or completion
+        # When user clicks Next on the assessment page, treat it like an export request
+        # — generate the HTML from the report widget and show the preview page.
+        try:
+            # call the report widget's export routine which emits export_requested
+            self.elemental_assessment_form.export_pdf()
+        except Exception as e:
+            print(f"Error while exporting from assessment next: {e}")
+
+    def on_export_requested(self, html: str, assessment_data: dict):
+        """Handle export request from the assessment form: generate PDF and show preview."""
+        pdf_path = None
+        # Try to generate a PDF using WeasyPrint
+        try:
+            from weasyprint import HTML
+            tf = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+            tf.close()
+            HTML(string=html).write_pdf(tf.name)
+            pdf_path = tf.name
+        except Exception as e:
+            # Fallback: write HTML to a temp file (no PDF)
+            try:
+                tf = tempfile.NamedTemporaryFile(
+                    delete=False, suffix='.html', mode='w', encoding='utf-8')
+                tf.write(html)
+                tf.close()
+                pdf_path = None
+            except Exception as e2:
+                print(f"Failed to generate PDF or HTML preview: {e} / {e2}")
+                pdf_path = None
+
+        # Show preview page (pass pdf path and html)
+        self.pdf_preview.load_preview(pdf_path, html)
+        # switch to preview page (index 2)
+        self.stacked_widget.setCurrentWidget(self.pdf_preview)
+        self.step_indicator.set_active_step(3)
 
     def create_right_panel(self):
         panel = QWidget()

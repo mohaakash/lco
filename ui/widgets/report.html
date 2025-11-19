@@ -4,51 +4,254 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        @page {
+            size: A4;
+            margin: 40px;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #222;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
             padding: 40px;
         }
 
+        .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 36px;
+            color: #008B8B;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 24px;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 13px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #003b3b;
+        }
+
         h1 {
-            color: #333;
+            font-size: 24px;
+            margin-top: 24px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-size: 14px;
+            margin-top: 14px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .small {
+            font-size: 12px;
+            color: #666;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 12px;
         }
 
-        td,
-        th {
-            border: 1px solid #ccc;
+        th,
+        td {
+            border: 1px solid #e0e0e0;
             padding: 8px;
+            text-align: left;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .element-card {
+            border: 1px solid #e8e8e8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .element-title {
+            font-weight: 700;
+            color: #006b6b;
+        }
+
+        .subtle {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .toc li {
+            margin: 6px 0;
         }
     </style>
 </head>
 
 <body>
-    <h1>Project Report</h1>
-    <p>Generated for: {{ name }}</p>
 
-    <h2>Summary</h2>
-    <p>{{ summary }}</p>
+    <!-- COVER PAGE -->
+    <div class="cover" id="cover">
+        <div class="title">Elemental Balance Assessment</div>
+        <div class="subtitle">Personalised wellness guidance</div>
+        <div class="meta">{{ report_date or "" }}</div>
+        <div style="height:20px"></div>
+        <div class="meta">Generated for: <strong>{{ Personal.name if Personal is defined else (name or '') }}</strong>
+        </div>
+    </div>
+    <div class="page-break"></div>
 
-    <h2>Items</h2>
-    <table>
-        <tr>
-            <th>#</th>
-            <th>Item</th>
-            <th>Value</th>
-        </tr>
-        {% for item in items %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.value }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container">
+        <!-- PERSONAL DETAILS -->
+        <div id="personal" class="section">
+            <h1>1. Personal Details</h1>
+            {% set p = Personal or {} %}
+            <p class="subtle">Name: <strong>{{ p.get('name','') }}</strong></p>
+            <p class="subtle">Date of Birth: {{ p.get('date_of_birth','') }} &nbsp; Time: {{ p.get('time_of_birth','')
+                }} &nbsp; Place: {{ p.get('place_of_birth','') }}</p>
+            <p class="subtle">Phone: {{ p.get('phone','') }} &nbsp; Email: {{ p.get('email','') }}</p>
+        </div>
+
+        <!-- TABLE OF CONTENTS -->
+        <div id="toc" class="section">
+            <h1>2. Table of Contents</h1>
+            <ol class="toc small">
+                <li><a href="#personal">1. Personal Details</a></li>
+                <li><a href="#elemental">2. Elemental Analysis</a></li>
+                <li><a href="#daily">3. Daily Plan</a></li>
+                <li><a href="#quality">4. Elemental Quality Assessment</a></li>
+            </ol>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- ELEMENTAL ANALYSIS -->
+        <div id="elemental" class="section">
+            <h1>3. Elemental Analysis</h1>
+            {% set ea = Elemental_Analysis or Elemental_Analysis if Elemental_Analysis is defined else {} %}
+            {% for el_name, el_data in ea.items() %}
+            <div class="element-card" id="element-{{ el_name|replace(' ','-') }}">
+                <div class="element-title">{{ el_name }} &nbsp; <span class="small">{{ el_data.get('Classification','')
+                        }}</span></div>
+                {% if el_data.get('Description') %}
+                <h3>Description</h3>
+                <div class="subtle">{{ el_data.get('Description') }}</div>
+                {% endif %}
+
+                {% if el_data.get('Scientific_Correlation') %}
+                <h3>Scientific Correlation</h3>
+                <div class="subtle">{{ el_data.get('Scientific_Correlation') }}</div>
+                {% endif %}
+
+                {% if el_data.get('Imbalance_Effects') %}
+                <h3>Imbalance Effects</h3>
+                <div class="subtle">{{ el_data.get('Imbalance_Effects') }}</div>
+                {% endif %}
+
+                {% set remedies = el_data.get('Remedies') or {} %}
+                {% if remedies %}
+                <h3>Remedies</h3>
+                <table>
+                    <tr>
+                        <th>Diet</th>
+                        <td>{{ remedies.get('Diet','') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Lifestyle & Exercise</th>
+                        <td>{{ remedies.get('Lifestyle_and_Exercise','') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Herbal / Energy Support</th>
+                        <td>{{ remedies.get('Herbal_or_Energy_Support','') }}</td>
+                    </tr>
+                </table>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- DAILY PLAN -->
+        <div id="daily" class="section">
+            <h1>4. Daily Plan</h1>
+            {% set dg = Daily_Guideline or {} %}
+            {% for period, content in dg.items() %}
+            <h2>{{ period }}</h2>
+            {% if content is mapping %}
+            <table>
+                {% for ck, cv in content.items() %}
+                <tr>
+                    <th>{{ ck.replace('_',' ') }}</th>
+                    <td>{{ cv }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <div class="subtle">{{ content }}</div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- ELEMENTAL QUALITY ASSESSMENT -->
+        <div id="quality" class="section">
+            <h1>5. Elemental Quality Assessment</h1>
+            {% set mods = Modalities or {} %}
+            {% for mname, mcontent in mods.items() %}
+            <div style="margin-bottom:12px;">
+                <h3>{{ mname }} {% if mcontent.get('Percentage') %}- <span class="small">{{ mcontent.get('Percentage')
+                        }}%</span>{% endif %}</h3>
+                {% if mcontent is mapping %}
+                <div class="subtle">{% for k,v in mcontent.items() if k!='Percentage' %}<p><strong>{{ k.replace('_',' ')
+                            }}:</strong> {{ v }}</p>{% endfor %}</div>
+                {% else %}
+                <div class="subtle">{{ mcontent }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- FOOTER / SUMMARY -->
+        <div class="section">
+            <h2>Summary</h2>
+            <div class="subtle">{{ Summary or '' }}</div>
+        </div>
+
+    </div>
+
 </body>
 
 </html>

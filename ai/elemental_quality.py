@@ -1,6 +1,7 @@
 from openai import OpenAI
 import google.generativeai as genai
-import json, re
+import json
+import re
 from dotenv import load_dotenv
 import os
 
@@ -139,6 +140,7 @@ Mutable energy brings flexibility and integration. Excess scatters; deficiency h
 """
 }
 
+
 def extract_json(text):
     """
     Safely extracts JSON from LLM output.
@@ -233,16 +235,14 @@ def generate_modality_report(cardinal_pct, fixed_pct, mutable_pct):
     return extract_json(raw_output)
 
 
-
 # ============================================
 # 5. TEST RUN
 # ============================================
 
-result = generate_modality_report(
-    cardinal_pct=1,
-    fixed_pct=0,
-    mutable_pct=6
-)
+# result = generate_modality_report(
+#     cardinal_pct=1,
+#     fixed_pct=0,
+#     mutable_pct=6
+# )
 
-print(json.dumps(result, indent=4))
-
+# print(json.dumps(result, indent=4))

@@ -143,8 +143,6 @@ class StepIndicator(QWidget):
 
         self.steps_data = [
             "Elemental Details",
-            "Health History",
-            "Elemental Assessment",
             "Full Report",
             "Export"
         ]
