@@ -228,9 +228,9 @@ class AccountCreationWidget(QWidget):
             modalities_src = full_report.get("Modality_Descriptions", {}) or {}
             modalities_map = {}
             try:
-                card_pct = int(cardinal)
-                fixed_pct = int(fixed)
-                mut_pct = int(mutable)
+                card_pct = float(cardinal)
+                fixed_pct = float(fixed)
+                mut_pct = float(mutable)
             except Exception:
                 card_pct = fixed_pct = mut_pct = ""
 
@@ -294,25 +294,25 @@ class AccountCreationWidget(QWidget):
         }
 
         # Element percentages
-        fire = int(pd.fire_element.text() or 0)
-        earth = int(pd.earth_element.text() or 0)
-        air = int(pd.air_element.text() or 0)
-        water = int(pd.water_element.text() or 0)
+        fire = float(pd.fire_element.text() or 0)
+        earth = float(pd.earth_element.text() or 0)
+        air = float(pd.air_element.text() or 0)
+        water = float(pd.water_element.text() or 0)
 
         # Qualities
-        cardinal = int(pd.cardinal_quality.text() or 0)
-        fixed = int(pd.fixed_quality.text() or 0)
-        mutable = int(pd.mutable_quality.text() or 0)
+        cardinal = float(pd.cardinal_quality.text() or 0)
+        fixed = float(pd.fixed_quality.text() or 0)
+        mutable = float(pd.mutable_quality.text() or 0)
 
         # Build user input for the single canonical report generator
         user_input = {
-            "fire": int(fire),
-            "earth": int(earth),
-            "air": int(air),
-            "water": int(water),
-            "cardinal": int(cardinal),
-            "fixed": int(fixed),
-            "mutable": int(mutable),
+            "fire": fire,
+            "earth": earth,
+            "air": air,
+            "water": water,
+            "cardinal": cardinal,
+            "fixed": fixed,
+            "mutable": mutable,
         }
 
         # show loading overlay

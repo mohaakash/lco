@@ -170,11 +170,26 @@ def get_element(sign):
     return None
 
 
+def get_quality(sign):
+    cardinal = ["Aries", "Cancer", "Libra", "Capricorn"]
+    fixed = ["Taurus", "Leo", "Scorpio", "Aquarius"]
+    mutable = ["Gemini", "Virgo", "Sagittarius", "Pisces"]
+
+    if sign in cardinal:
+        return "Cardinal"
+    if sign in fixed:
+        return "Fixed"
+    if sign in mutable:
+        return "Mutable"
+    return None
+
+
 # ----------------------------------------------------------
 # 5. Calculate elemental distribution
 # ----------------------------------------------------------
 def calculate_elements(planets):
     element_scores = {"Fire": 0, "Water": 0, "Earth": 0, "Air": 0}
+    quality_scores = {"Cardinal": 0, "Fixed": 0, "Mutable": 0}
 
     planet_points = {
         "Sun": 4,
@@ -193,6 +208,10 @@ def calculate_elements(planets):
             element = get_element(sign)
             if element:
                 element_scores[element] += planet_points.get(planet, 0)
+            
+            quality = get_quality(sign)
+            if quality:
+                quality_scores[quality] += planet_points.get(planet, 0)
 
     # Handle Ruler of Ascendant (extra 2 points)
     asc_sign = planets.get("Asc")
@@ -203,6 +222,10 @@ def calculate_elements(planets):
             ruler_element = get_element(ruler_sign)
             if ruler_element:
                 element_scores[ruler_element] += 2   # +2 points
+            
+            ruler_quality = get_quality(ruler_sign)
+            if ruler_quality:
+                quality_scores[ruler_quality] += 2   # +2 points
 
     # Convert to percentages
     total_points = sum(element_scores.values())
@@ -211,7 +234,13 @@ def calculate_elements(planets):
         for el, score in element_scores.items()
     }
 
-    return element_scores, element_percentages
+    total_quality_points = sum(quality_scores.values())
+    quality_percentages = {
+        q: round((score / total_quality_points) * 100, 2) if total_quality_points > 0 else 0
+        for q, score in quality_scores.items()
+    }
+
+    return element_scores, element_percentages, quality_scores, quality_percentages
 
 
 # ----------------------------------------------------------
@@ -225,11 +254,11 @@ def process_kepler_pdf(pdf_path):
 def process_text(text):
     """Process raw text (extracted from page 3) and compute element scores.
 
-    Returns (planets_dict, element_scores, element_percentages)
+    Returns (planets_dict, element_scores, element_percentages, quality_scores, quality_percentages)
     """
     planets = parse_planet_positions_robust(text)
-    scores, percentages = calculate_elements(planets)
-    return planets, scores, percentages
+    scores, percentages, q_scores, q_percentages = calculate_elements(planets)
+    return planets, scores, percentages, q_scores, q_percentages
 
 
 # ----------------------------------------------------------
@@ -237,7 +266,7 @@ def process_text(text):
 # ----------------------------------------------------------
 if __name__ == "__main__":
     pdf_path = "docs/kepler.pdf"   # <-- replace with your file path
-    planets, scores, percentages = process_kepler_pdf(pdf_path)
+    planets, scores, percentages, q_scores, q_percentages = process_kepler_pdf(pdf_path)
 
     print("\nExtracted Planet Positions:")
     print(planets)
@@ -247,3 +276,9 @@ if __name__ == "__main__":
 
     print("\nElement Percentages:")
     print(percentages)
+
+    print("\nQuality Points:")
+    print(q_scores)
+
+    print("\nQuality Percentages:")
+    print(q_percentages)
