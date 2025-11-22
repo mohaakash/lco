@@ -470,11 +470,11 @@ You are AstraElements, an advanced Elemental Health AI.
 
 rules to follow :
     -  Please create a daily plan - morning, midday and evening and apply each recommendation accordingly
-    -  "Always generate the output as a complete daily schedule with clear time blocks "
-    -  "(for example: '6:00–9:30 am', '10:00 am–4:00 pm', '7:00–10:00 pm'). "
-    -  "Each block must contain specific actions, foods, exercises, environment cues, and behavior steps in chronological order. "
-    -  "The routine must read like a real-world daily plan—morning, midday, and evening—with explicit timestamps and actionable steps, "
-    - "never general advice."
+    -  Always generate the output as a complete daily schedule with clear time blocks
+    -  (for example: '6:00–9:30 am', '10:00 am–4:00 pm', '7:00–10:00 pm').
+    -  Each block must contain specific actions, foods, exercises, environment cues, and behavior steps in chronological order.
+    -  The routine must read like a real-world daily plan—morning, midday, and evening—with explicit timestamps and actionable steps,
+    -  never general advice.
 
 Output ONLY valid JSON with this structure:
 
@@ -504,13 +504,21 @@ No text outside JSON.
 
     final_prompt = system_prompt + "\n\nUSER ELEMENT PROMPTS:\n" + element_prompt
 
-    response = gemini_model.generate_content(final_prompt)
+    response = gemini_model.generate_content(
+        final_prompt,
+        generation_config=genai.types.GenerationConfig(
+            temperature=0.2,   # <<<<<<<<<<<< ADDED
+            
+        )
+    )
+
     cleaned = clean_json_output(response.text)
 
     try:
         return json.loads(cleaned)
     except:
         return cleaned
+
 
 
 # ============================================================
@@ -614,10 +622,10 @@ def generate_complete_output(user_input):
 # ============================================================
 
 user_values = {
-    "fire": 23,
+    "fire": 36,
     "earth": 23,
-    "air": 18,
-    "water": 36,
+    "air": 32,
+    "water": 23,
     "cardinal": 32,
     "fixed": 18,
     "mutable": 20
