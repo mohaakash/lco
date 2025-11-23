@@ -6,340 +6,487 @@
     <style>
         @page {
             size: A4;
-            margin: 40px;
+            margin: 20mm 20mm 20mm 20mm;
+
+            @top-center {
+                content: element(header);
+            }
+
+            @bottom-center {
+                content: element(footer);
+            }
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            color: #222;
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
             line-height: 1.5;
             margin: 0;
             padding: 0;
+            font-size: 12px;
+            text-align: justify;
         }
 
-        .container {
-            padding: 40px;
+        /* Header & Footer */
+        div.header {
+            position: running(header);
+            text-align: center;
+            margin-bottom: 20px;
         }
 
+        div.footer {
+            position: running(footer);
+            text-align: center;
+            font-size: 9px;
+            color: #000;
+            width: 100%;
+        }
+
+        .logo {
+            width: 120px;
+            /* Adjusted size */
+        }
+
+        /* Cover Page */
         .cover {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 90vh;
+            /* Adjust for header/footer */
             text-align: center;
         }
 
-        .title {
-            font-size: 36px;
-            color: #008B8B;
-            margin-bottom: 8px;
+        .cover-image {
+            width: 400px;
+            margin-bottom: 20px;
+            border-radius: 8px;
         }
 
-        .subtitle {
-            font-size: 16px;
-            color: #555;
-            margin-bottom: 24px;
-        }
-
-        .meta {
-            color: #666;
-            font-size: 13px;
-        }
-
-        h1,
-        h2,
-        h3 {
-            color: #003b3b;
-        }
-
-        h1 {
+        .client-name {
             font-size: 24px;
-            margin-top: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .report-date {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 15px;
+            color: blue;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: left;
+            border: none;
+            /* Remove previous border */
         }
 
         h2 {
-            font-size: 18px;
-            margin-top: 20px;
+            font-size: 12px;
+            color: orange;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            text-align: left;
         }
 
         h3 {
-            font-size: 14px;
-            margin-top: 14px;
-        }
-
-        .section {
-            margin-bottom: 28px;
-        }
-
-        .small {
             font-size: 12px;
-            color: #666;
+            color: #000;
+            /* Normal text color but bold */
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-align: left;
         }
 
+        /* Special case for Modality Titles (Fixed/Mutable/Cardinal Energy) */
+        .modality-title {
+            font-size: 12px;
+            color: blue;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        .blue-center {
+            color: blue;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .elemental-blueprint {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .elemental-blueprint span.label {
+            color: blue;
+        }
+
+        .elemental-blueprint span.value {
+            color: red;
+        }
+
+        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
+            margin: 15px 0;
+            font-size: 12px;
         }
 
         th,
         td {
-            border: 1px solid #e0e0e0;
+            border: 1px solid #000;
             padding: 8px;
             text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
         }
 
         .page-break {
             page-break-after: always;
         }
 
-        .element-card {
-            border: 1px solid #e8e8e8;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-
-        /* Percentage badge and bar */
-        .badge {
-            display: inline-block;
-            background: #f0f8f8;
-            color: #003b3b;
-            border-radius: 12px;
-            padding: 4px 8px;
-            font-size: 12px;
-            margin-left: 6px;
-        }
-
-        .progress-wrap {
-            background: #f3f7f7;
-            border-radius: 6px;
-            overflow: hidden;
-            height: 10px;
-            width: 220px;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff8a65, #ff5252);
-            width: 0%;
-        }
-
-        .element-title {
-            font-weight: 700;
-            color: #006b6b;
+        .human-img {
+            display: block;
+            margin: 20px auto;
+            max-width: 300px;
         }
 
         .subtle {
-            color: #666;
-            font-size: 13px;
-        }
-
-        .toc li {
-            margin: 6px 0;
+            color: #000;
+            /* Reset subtle color to black for this design */
         }
     </style>
 </head>
 
 <body>
 
-    <!-- COVER PAGE -->
-    <div class="cover" id="cover">
-        <div class="title">Elemental Balance Assessment</div>
-        <div class="subtitle">Personalised wellness guidance</div>
-        <div class="meta">{{ report_date or "" }}</div>
-        <div style="height:20px"></div>
-        <div class="meta">Generated for: <strong>{{ Personal.name if Personal is defined else (name or '') }}</strong>
-        </div>
+    <!-- Header (Logo) -->
+    <div class="header">
+        {% if logo_png %}
+        <img src="data:image/png;base64,{{ logo_png }}" class="logo" alt="Logo" />
+        {% endif %}
     </div>
+
+    <!-- Footer (Disclaimer) -->
+    <div class="footer">
+        DISCLAIMER: The content of this document, such as text, graphics, images, and other material contained are for
+        informational purposes only. This document is not intended to be a substitute for professional medical advice,
+        diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any
+        questions you may have regarding a health condition.
+    </div>
+
+    <!-- COVER PAGE -->
+    <div class="cover">
+        {% if cover_image_png %}
+        <img src="data:image/png;base64,{{ cover_image_png }}" class="cover-image" alt="Cover Image" />
+        {% endif %}
+
+        <div class="client-name">{{ Personal.name if Personal is defined else (name or 'Client Name') }}</div>
+        <div class="report-date">{{ report_date or "" }}</div>
+    </div>
+
     <div class="page-break"></div>
 
-    <div class="container">
-        <!-- PERSONAL DETAILS -->
-        <div id="personal" class="section">
-            <h1>1. Personal Details</h1>
-            {% set p = Personal or {} %}
-            <p class="subtle">Name: <strong>{{ p.get('name','') }}</strong></p>
-            <p class="subtle">Date of Birth: {{ p.get('date_of_birth','') }} &nbsp; Time: {{ p.get('time_of_birth','')
-                }} &nbsp; Place: {{ p.get('place_of_birth','') }}</p>
-            <p class="subtle">Phone: {{ p.get('phone','') }} &nbsp; Email: {{ p.get('email','') }}</p>
+    <!-- How Planetary Fields Entangle... -->
+    <div>
+        <h1>How Planetary Fields Entangle with Your Body's Energy Blueprint</h1>
+
+        <p>Holistic well-being begins with a preventive approach to health, urging us not to wait until disease
+            manifests. Your food choices play a pivotal role in shaping your body’s health, but it’s not just what you
+            eat; your thoughts and emotional state significantly influence your well-being.</p>
+
+        <p>Your body is interconnected to the environment surrounding you, from the obvious impacts of diet and
+            lifestyle to even the more subtle influences like planetary gravitational pulls. We are most familiar with
+            how the lunar cycle affects human behavior and physiology. The other planets in the solar system exert their
+            influence in more subtle ways, affecting our energetic body.</p>
+
+        <p>Our etheric body, our subtle energy counterpart of the physical body, possesses a series of force centers
+            (nerves plexus) or chakras that receive the energy of the planets. According to Eastern teachings, the
+            energy we receive from the Trinity passes from these subtle centers into our physical body by means of
+            invisible circuits called nadis (Savitri, Hindu text) or meridians (TCM).</p>
+
+        <p>All ailments are caused because our magnetic field doesn’t pull enough energy from the air we breathe into
+            the lungs to supply the different parts of the body, so when weaker areas are not supplied with their
+            energy, abnormal function results.</p>
+
+        <p>Your astral chart reflects your own energy pattern to offer insights into your state of health, pinpoint
+            nutritional deficiencies, and gauge your psychological balance.</p>
+
+        <p>The condition and placement of planets in your chart can indicate potential health issues based on their
+            dignity and avasthas, as well as the zodiac sign, they occupy. However, it's important to note that not all
+            symptoms or diseases are certain to manifest, and their occurrence may vary throughout different stages of
+            life corresponding to planetary periods (dasas/profections) and transits.</p>
+
+        <p>When multiple planets highlight a particular ailment, the likelihood of its manifestation increases.</p>
+
+        <p>Nonetheless, health astrology operates akin to a personalized weather forecast, offering insights for
+            preventive measures rather than definitive predictions. Just as one prepares for possible rain by carrying
+            an umbrella, understanding one's astrological health indicators facilitates proactive healthcare strategies
+            aimed at prevention.</p>
+
+        {% if human_png %}
+        <img src="data:image/png;base64,{{ human_png }}" class="human-img" alt="Human Energy Field" />
+        {% endif %}
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- The Elements -->
+    <div>
+        <h1>The Elements</h1>
+
+        <p>The four elements Fire Earth Water and Air can help you to pinpoint some obvious and easy ways to correct
+            factors that affect health. Too much or not enough of an element can contribute to weakness in various parts
+            of the body. By compensating for a lack of or an emphasis on an element one can alter the imbalance and
+            improve health.</p>
+
+        <p>Fire Earth Water and Air elements are the building-blocks of our physical as well as of our psychological
+            functioning and we find them also in natural substances like herbs, and nutrition. This is the reason why
+            understanding your health energetic blueprint makes healing possible.</p>
+
+        <p>The Four Humors (Hippocrates, Galen) are the metabolic agents of the Four Elements in the human body. The
+            right balance and purity of them is essential to maintaining health.</p>
+
+        <div class="blue-center">An excess of a humor may lead to a great diversity of symptoms and diseases with the
+            problem manifesting through the weakest point of the individual client.</div>
+
+        <p>Every humor or element is a combination of two qualities: TEMPERATURE & MOISTURE. These concepts apply both
+            physically and psychologically.</p>
+
+        <table>
+            <tr>
+                <td><strong>FIRE</strong></td>
+                <td><strong>HOT AND DRY</strong></td>
+                <td>Heat: energy life impulse motive movement energy is spent and body cools down</td>
+            </tr>
+            <tr>
+                <td><strong>AIR</strong></td>
+                <td><strong>HOT AND MOIST</strong></td>
+                <td>Coolness; malfunction, not enough energy for metabolic processes</td>
+            </tr>
+            <tr>
+                <td><strong>EARTH</strong></td>
+                <td><strong>COLD AND DRY</strong></td>
+                <td>Dryness: maintains form and creates boundaries</td>
+            </tr>
+            <tr>
+                <td><strong>WATER</strong></td>
+                <td><strong>COLD AND MOIST</strong></td>
+                <td>Moisture: cool conditions attract moisture, connects and softens</td>
+            </tr>
+        </table>
+
+        <p>Because heat and cold are the primary characteristics, the placement on the scale of hot/cold is most
+            important.</p>
+
+        <p>An organism that is cold has to be heated and one that is too hot has to be cooled down. In practice we will
+            use mainly foods of a humoral nature, contrary to the excess humor (the principle of antipathy). Also some
+            foods can be eaten which have the temperature as the healing element but not the same degree of moisture/
+            dryness.</p>
+
+        <p>If the problem is excess water it is best to avoid all cold and moist foods and eat as much as you can from
+            those foods listed under hot and dry. But some foods under hot and moist can be eaten too. These foods will
+            heat the body up, and more heat always means less moisture. The secondary axis the moisture/dryness rate
+            depends on the heat/cold axis to a certain extent.</p>
+
+        <p>Lastly, Herbs should work against the humoral excess that causes the disease; this is the most important
+            thing. The exact herb that you need will be determined by the planetary positions in your chart. Also, they
+            have to be taken at the right planetary hour for better results.</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Your Elemental Blueprint -->
+    <div>
+        <h1>Your Elemental Blueprint</h1>
+
+        {% set ep = Element_Percentages if (Element_Percentages is defined) else {} %}
+        <div class="elemental-blueprint">
+            <span class="label">Your element combination = </span>
+            <span class="label">Fire</span> <span class="value">{{ ep.get('Fire', 0) }}%</span> –
+            <span class="label">Earth</span> <span class="value">{{ ep.get('Earth', 0) }}%</span> –
+            <span class="label">Air</span> <span class="value">{{ ep.get('Air', 0) }}%</span> –
+            <span class="label">Water</span> <span class="value">{{ ep.get('Water', 0) }}%</span>
         </div>
 
-        <!-- TABLE OF CONTENTS -->
-        <div id="toc" class="section">
-            <h1>2. Table of Contents</h1>
-            <ol class="toc small">
-                <li><a href="#personal">1. Personal Details</a></li>
-                <li><a href="#elemental">2. Elemental Analysis</a></li>
-                <li><a href="#daily">3. Daily Plan</a></li>
-                <li><a href="#quality">4. Elemental Quality Assessment</a></li>
-            </ol>
-        </div>
+        {# Prefer generator keys Element_Descriptions, fall back to mapped Elemental_Analysis #}
+        {% set ea = Element_Descriptions if (Element_Descriptions is defined) else (Elemental_Analysis if
+        (Elemental_Analysis is defined) else {}) %}
 
-        <div class="page-break"></div>
+        {% for el_name in ['Fire', 'Air', 'Water', 'Earth'] %}
+        {% set el_data = ea.get(el_name, {}) %}
 
-        <!-- ELEMENTAL ANALYSIS -->
-        <div id="elemental" class="section">
-            <h1>3. Elemental Analysis</h1>
-            {# Prefer generator keys Element_Descriptions, fall back to mapped Elemental_Analysis #}
-            {% set ea = Element_Descriptions if (Element_Descriptions is defined) else (Elemental_Analysis if
-            (Elemental_Analysis is defined) else {}) %}
+        <h2>The {{ el_name }} Element</h2>
 
-            {# Show element percentages if provided #}
-            {% set ep = Element_Percentages if (Element_Percentages is defined) else {} %}
-            {% if ep %}
-            <div style="margin-bottom:12px;">
-                <h3>Element Percentages</h3>
-                <p class="subtle">
-                    {% for k in ['Fire','Earth','Air','Water'] %}
-                    {% if ep.get(k) is defined %}
-                    <strong>{{ k }}:</strong>
-                    <span class="badge">{{ ep.get(k) }}%</span>
-                    <span class="progress-wrap"><span class="progress-bar"
-                            style="width: {{ ep.get(k) }}%"></span></span>
-                    &nbsp;&nbsp;
-                    {% endif %}
-                    {% endfor %}
-                </p>
-                {% if element_chart_png %}
-                <div style="margin-top:8px;margin-bottom:6px;">
-                    <img src="data:image/png;base64,{{ element_chart_png }}" alt="element-chart"
-                        style="max-width:320px; height:auto; border-radius:6px; border:1px solid #eee;" />
-                </div>
-                {% endif %}
-            </div>
+        {# Extract content #}
+        {% set content_raw = el_data.get('Content') if (el_data is mapping) else (el_data.get('Description') if (el_data
+        is mapping) else (el_data if not (el_data is mapping) else '')) %}
+
+        {% set description = '' %}
+        {% set scientific = '' %}
+        {% set imbalance = '' %}
+        {% set remedies = {} %}
+
+        {% if content_raw is mapping %}
+        {% set description = content_raw.get('The Fire Element') or content_raw.get('The Earth Element') or
+        content_raw.get('The Air Element') or content_raw.get('The Water Element') or content_raw.get('Description') or
+        '' %}
+        {% set scientific = content_raw.get('Scientific Correlation') or '' %}
+
+        {% set imb_list = [] %}
+        {% if content_raw.get('What Low Fire Feels Like—and How It Holds You Back') %}{% set _ =
+        imb_list.append(content_raw.get('What Low Fire Feels Like—and How It Holds You Back')) %}{% endif %}
+        {% if content_raw.get('What Excess Fire Feels Like—and Why You Need to Rein It In') %}{% set _ =
+        imb_list.append(content_raw.get('What Excess Fire Feels Like—and Why You Need to Rein It In')) %}{% endif %}
+        {% if content_raw.get('Imbalance Effects') %}{% set _ = imb_list.append(content_raw.get('Imbalance Effects'))
+        %}{% endif %}
+        {% set imbalance = imb_list|join('<br><br>') %}
+
+        {% set diet = content_raw.get('Diet') or '' %}
+        {% set lifestyle = content_raw.get('Lifestyle and Exercise') or '' %}
+        {% set herbal = content_raw.get('Gems, Flower Remedies, and Aromas') or content_raw.get('Herbs') or
+        content_raw.get('Crystals, Gems, and Herbal Remedies') or '' %}
+        {% set remedies = {'Diet': diet, 'Lifestyle_and_Exercise': lifestyle, 'Herbal_or_Energy_Support': herbal} %}
+        {% else %}
+        {% set description = content_raw %}
+        {% set scientific = el_data.get('Scientific_Correlation') %}
+        {% set imbalance = el_data.get('Imbalance_Effects') %}
+        {% set remedies = el_data.get('Remedies') or {} %}
+        {% endif %}
+
+        {% if description %}
+        <p>{{ description }}</p>
+        {% endif %}
+
+        {% if scientific %}
+        <h3>Scientific Correlation</h3>
+        <p>{{ scientific }}</p>
+        {% endif %}
+
+        {% if imbalance %}
+        <h3>Imbalance Effects</h3>
+        <p>{{ imbalance }}</p>
+        {% endif %}
+
+        {% if remedies and (remedies.Diet or remedies.Lifestyle_and_Exercise or remedies.Herbal_or_Energy_Support) %}
+        <h3>Remedies</h3>
+        <table>
+            {% if remedies.Diet %}
+            <tr>
+                <td width="30%"><strong>Diet</strong></td>
+                <td>{{ remedies.Diet }}</td>
+            </tr>
             {% endif %}
-
-            {% for el_name, el_data in ea.items() %}
-            {# support both generator shape {Title,Content} and legacy mapping with Description/Remedies #}
-            {% set title = el_data.get('Title') if (el_data is mapping) else '' %}
-            {% set description = (el_data.get('Content') if (el_data is mapping and el_data.get('Content')) else
-            el_data.get('Description') if (el_data is mapping) else (el_data if not (el_data is mapping) else '')) %}
-            {% set status = el_data.get('Status') if (el_data is mapping) else '' %}
-            {% set pct = el_data.get('Percentage') if (el_data is mapping and el_data.get('Percentage') is not none)
-            else (ep.get(el_name) if ep.get(el_name) is defined else None) %}
-            <div class="element-card" id="element-{{ el_name|replace(' ','-') }}">
-                <div class="element-title">{{ el_name }}
-                    {% if pct is not none %}
-                    &nbsp; - <span class="small">{{ pct }}%</span>
-                    {% endif %}
-                    {% if status %}
-                    &nbsp; <span class="small">({{ status }})</span>
-                    {% endif %}
-                </div>
-                {% if title %}
-                <h3>{{ title }}</h3>
-                {% endif %}
-                {% if description %}
-                <h3>Description</h3>
-                <div class="subtle">{{ description }}</div>
-                {% endif %}
-
-                {% if el_data.get('Scientific_Correlation') %}
-                <h3>Scientific Correlation</h3>
-                <div class="subtle">{{ el_data.get('Scientific_Correlation') }}</div>
-                {% endif %}
-
-                {% if el_data.get('Imbalance_Effects') %}
-                <h3>Imbalance Effects</h3>
-                <div class="subtle">{{ el_data.get('Imbalance_Effects') }}</div>
-                {% endif %}
-
-                {% set remedies = el_data.get('Remedies') or {} %}
-                {% if remedies %}
-                <h3>Remedies</h3>
-                <table>
-                    <tr>
-                        <th>Diet</th>
-                        <td>{{ remedies.get('Diet','') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Lifestyle & Exercise</th>
-                        <td>{{ remedies.get('Lifestyle_and_Exercise','') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Herbal / Energy Support</th>
-                        <td>{{ remedies.get('Herbal_or_Energy_Support','') }}</td>
-                    </tr>
-                </table>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="page-break"></div>
-
-        <!-- DAILY PLAN -->
-        <div id="daily" class="section">
-            <h1>4. Daily Plan</h1>
-            {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is
-            defined) else {}) %}
-            {% for period, content in dg.items() %}
-            <h2>{{ period }}</h2>
-            {% if content is mapping %}
-            <table>
-                {% for ck, cv in content.items() %}
-                <tr>
-                    <th>{{ ck.replace('_',' ') }}</th>
-                    <td>{{ cv }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <div class="subtle">{{ content }}</div>
+            {% if remedies.Lifestyle_and_Exercise %}
+            <tr>
+                <td><strong>Lifestyle & Exercise</strong></td>
+                <td>{{ remedies.Lifestyle_and_Exercise }}</td>
+            </tr>
             {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="page-break"></div>
-
-        <!-- ELEMENTAL QUALITY ASSESSMENT -->
-        <div id="quality" class="section">
-            <h1>5. Elemental Quality Assessment</h1>
-            {% set mods = Modality_Descriptions if (Modality_Descriptions is defined) else (Modalities if (Modalities is
-            defined) else {}) %}
-            {% set mp = Modalities_Percentages if (Modalities_Percentages is defined) else {} %}
-
-            {% if mp %}
-            <div style="margin-bottom:12px;">
-                <h3>Modalities Percentages</h3>
-                <p class="subtle">
-                    {% for k in ['Cardinal','Fixed','Mutable'] %}
-                    {% if mp.get(k) is defined %}
-                    <strong>{{ k }}:</strong> {{ mp.get(k) }}%&nbsp;&nbsp;
-                    {% endif %}
-                    {% endfor %}
-                </p>
-            </div>
+            {% if remedies.Herbal_or_Energy_Support %}
+            <tr>
+                <td><strong>Herbal / Energy Support</strong></td>
+                <td>{{ remedies.Herbal_or_Energy_Support }}</td>
+            </tr>
             {% endif %}
+        </table>
+        {% endif %}
+        {% endfor %}
+    </div>
 
-            {% for mname, mcontent in mods.items() %}
-            <div style="margin-bottom:12px;">
-                {% set mpct = mp.get(mname) if mp.get(mname) is defined else (mcontent.get('Percentage') if (mcontent is
-                mapping and mcontent.get('Percentage') is defined) else None) %}
-                <h3>{{ mname }} {% if mpct %}- <span class="small">{{ mpct }}%</span>{% endif %}</h3>
-                {% if mcontent is mapping %}
-                <div class="subtle">{% for k,v in mcontent.items() if k!='Percentage' %}<p><strong>{{ k.replace('_',' ')
-                            }}:</strong> {{ v }}</p>{% endfor %}</div>
-                {% else %}
-                <div class="subtle">{{ mcontent }}</div>
-                {% endif %}
-            </div>
+    <div class="page-break"></div>
+
+    <!-- Your Daily Plan to Restore Balance -->
+    <div>
+        <h1>Your Daily Plan to Restore Balance</h1>
+        {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is defined)
+        else {}) %}
+
+        {% for period in ['Morning', 'Midday', 'Evening', 'Weekly Additions'] %}
+        {% if dg.get(period) %}
+        <h2>{{ period }}</h2>
+        {% set content = dg.get(period) %}
+        {% if content is mapping %}
+        <table>
+            {% for ck, cv in content.items() %}
+            <tr>
+                <td width="30%"><strong>{{ ck.replace('_',' ') }}</strong></td>
+                <td>{{ cv }}</td>
+            </tr>
             {% endfor %}
+        </table>
+        {% else %}
+        <p>{{ content }}</p>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- The Qualities of your Elements -->
+    <div>
+        <h1>The Qualities of your Elements</h1>
+
+        <p>The distribution on planets in the zodiacal wheel shows how we respond to stimuli, and especially how we act
+            under tension. The presence of planets in a particular sign indicates how that sign expresses their element,
+            meaning the mode of behavior they use to express the element needs. There are three qualities: Cardinal,
+            Fixed, and Mutable.</p>
+        <p>The quality of elements in your chart is</p>
+
+        {% set mp = Modalities_Percentages if (Modalities_Percentages is defined) else {} %}
+        <div class="elemental-blueprint">
+            <span class="label">Cardinal</span> <span class="value">{{ mp.get('Cardinal', 0) }}%</span> –
+            <span class="label">Fixed</span> <span class="value">{{ mp.get('Fixed', 0) }}%</span> –
+            <span class="label">Mutable</span> <span class="value">{{ mp.get('Mutable', 0) }}%</span>
         </div>
 
-        <div class="page-break"></div>
+        {% set mods = Modality_Descriptions if (Modality_Descriptions is defined) else (Modalities if (Modalities is
+        defined) else {}) %}
 
-        <!-- FOOTER / SUMMARY -->
-        <div class="section">
-            <h2>Summary</h2>
-            <div class="subtle">{{ Summary or '' }}</div>
-        </div>
+        {% for mname, mcontent in mods.items() %}
+        {% set title = mcontent.get('Title') if (mcontent is mapping) else '' %}
+        {% if title %}
+        <div class="modality-title">{{ title }}</div>
+        {% else %}
+        <div class="modality-title">{{ mname }} Energy</div>
+        {% endif %}
 
+        {% set inner_content = mcontent.get('Content') if (mcontent is mapping) else mcontent %}
+
+        {% if inner_content is mapping %}
+        {% for k,v in inner_content.items() %}
+        <p><strong>{{ k.replace('_',' ') }}:</strong> {{ v }}</p>
+        {% endfor %}
+        {% else %}
+        <p>{{ inner_content }}</p>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div style="margin-top: 50px; text-align: center; font-weight: bold; font-size: 14px;">
+        END OF THE ELEMENTS REPORT
     </div>
 
 </body>

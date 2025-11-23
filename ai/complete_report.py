@@ -1,4 +1,4 @@
-from openai import OpenAI
+
 import google.generativeai as genai
 import json
 import os
@@ -523,16 +523,6 @@ No text outside JSON.
 
     final_prompt = system_prompt + "\n\nUSER ELEMENT PROMPTS:\n" + element_prompt
 
-<<<<<<< HEAD
-    response = gemini_model.generate_content(
-        final_prompt,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.2
-        )
-    )
-
-    cleaned = clean_json_output(response.text)
-=======
     # call the model with a couple of retries and safe JSON parsing
     cleaned = None
     last_exc = None
@@ -554,7 +544,6 @@ No text outside JSON.
             logger.error(
                 "generate_daily_routine attempt %s failed: %s", attempt + 1, exc)
             time.sleep(1 * (attempt + 1))
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
 
     # all retries failed
     logger.exception(
@@ -577,110 +566,61 @@ def build_descriptions_json(user_input):
 
     result = {}
 
-<<<<<<< HEAD
     # Helper: parse JSON if possible
     def parse_json_if_possible(text):
         try:
             return json.loads(text)
         except:
-            return text.strip()
+            return {"Content": text.strip()}
 
     # FIRE
-    if fire > 28:
+    fire_status = _element_status(fire)
+    if fire_status == "High":
         result["Fire"] = parse_json_if_possible(fire_high_fixed)
-    if fire < 23:
+    elif fire_status == "Low":
         result["Fire"] = parse_json_if_possible(fire_low_fixed)
+    else:
+        result["Fire"] = {"Content": "Fire appears balanced based on the input."}
+    
+    result["Fire"]["Status"] = fire_status
+    result["Fire"]["Percentage"] = percentages.get("Fire", 0)
 
     # EARTH
-    if earth > 28:
+    earth_status = _element_status(earth)
+    if earth_status == "High":
         result["Earth"] = parse_json_if_possible(earth_high_fixed)
-    if earth < 23:
+    elif earth_status == "Low":
         result["Earth"] = parse_json_if_possible(earth_low_fixed)
+    else:
+        result["Earth"] = {"Content": "Earth appears balanced based on the input."}
+
+    result["Earth"]["Status"] = earth_status
+    result["Earth"]["Percentage"] = percentages.get("Earth", 0)
 
     # AIR
-    if air > 28:
+    air_status = _element_status(air)
+    if air_status == "High":
         result["Air"] = parse_json_if_possible(air_high_fixed)
-    if air < 23:
+    elif air_status == "Low":
         result["Air"] = parse_json_if_possible(air_low_fixed)
+    else:
+        result["Air"] = {"Content": "Air appears balanced based on the input."}
+
+    result["Air"]["Status"] = air_status
+    result["Air"]["Percentage"] = percentages.get("Air", 0)
 
     # WATER
-    if water > 28:
+    water_status = _element_status(water)
+    if water_status == "High":
         result["Water"] = parse_json_if_possible(water_high_fixed)
-    if water < 23:
+    elif water_status == "Low":
         result["Water"] = parse_json_if_possible(water_low_fixed)
-=======
-    # Fire
-    status = _element_status(fire)
-    if status == "High":
-        title = extract_title(fire_high_fixed)
-        content = fire_high_fixed.strip()
-    elif status == "Low":
-        title = extract_title(fire_low_fixed)
-        content = fire_low_fixed.strip()
     else:
-        title = "Fire"
-        content = "Fire appears balanced based on the input; no corrective fixed text applies."
-    result["Fire"] = {
-        "Title": title,
-        "Content": content,
-        "Status": status,
-        "Percentage": percentages.get("Fire", 0),
-    }
+        result["Water"] = {"Content": "Water appears balanced based on the input."}
 
-    # Earth
-    status = _element_status(earth)
-    if status == "High":
-        title = extract_title(earth_high_fixed)
-        content = earth_high_fixed.strip()
-    elif status == "Low":
-        title = extract_title(earth_low_fixed)
-        content = earth_low_fixed.strip()
-    else:
-        title = "Earth"
-        content = "Earth appears balanced based on the input; no corrective fixed text applies."
-    result["Earth"] = {
-        "Title": title,
-        "Content": content,
-        "Status": status,
-        "Percentage": percentages.get("Earth", 0),
-    }
+    result["Water"]["Status"] = water_status
+    result["Water"]["Percentage"] = percentages.get("Water", 0)
 
-    # Air
-    status = _element_status(air)
-    if status == "High":
-        title = extract_title(air_high_fixed)
-        content = air_high_fixed.strip()
-    elif status == "Low":
-        title = extract_title(air_low_fixed)
-        content = air_low_fixed.strip()
-    else:
-        title = "Air"
-        content = "Air appears balanced based on the input; no corrective fixed text applies."
-    result["Air"] = {
-        "Title": title,
-        "Content": content,
-        "Status": status,
-        "Percentage": percentages.get("Air", 0),
-    }
-
-    # Water
-    status = _element_status(water)
-    if status == "High":
-        title = extract_title(water_high_fixed)
-        content = water_high_fixed.strip()
-    elif status == "Low":
-        title = extract_title(water_low_fixed)
-        content = water_low_fixed.strip()
-    else:
-        title = "Water"
-        content = "Water appears balanced based on the input; no corrective fixed text applies."
-    result["Water"] = {
-        "Title": title,
-        "Content": content,
-        "Status": status,
-        "Percentage": percentages.get("Water", 0),
-    }
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
 
     return result
 
@@ -707,25 +647,14 @@ def build_modality_descriptions(user_input):
 
     # Now store JSON directly EXACTLY like element_descriptions
     if cardinal == highest:
-<<<<<<< HEAD
         result["Cardinal"] = parse_json_if_possible(cardinal_description)
-=======
-        t = extract_title(cardinal_description)
-        result["Cardinal"] = {"Title": t,
-                              "Content": cardinal_description.strip()}
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
 
     if fixed_v == highest:
         result["Fixed"] = parse_json_if_possible(fixed_description)
 
     if mutable == highest:
-<<<<<<< HEAD
         result["Mutable"] = parse_json_if_possible(mutable_description)
-=======
-        t = extract_title(mutable_description)
-        result["Mutable"] = {"Title": t,
-                             "Content": mutable_description.strip()}
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
+
 
     return result
 
@@ -753,9 +682,6 @@ def generate_complete_output(user_input) -> dict:
     # prepare descriptions and percentages
     element_descriptions = build_descriptions_json(user_input)
     modality_descriptions = build_modality_descriptions(user_input)
-<<<<<<< HEAD
-=======
-
     # compute modality percentages
     try:
         cardinal = int(user_input.get("cardinal", 0))
@@ -768,7 +694,6 @@ def generate_complete_output(user_input) -> dict:
     modalities_percent = _compute_percentages(modalities_raw)
 
     # generate daily routine (may return parsed dict or structured fallback)
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
     daily_routine = generate_daily_routine(user_input)
 
     # also produce a simple Element_Percentages mapping (from the descriptions entries)
@@ -793,31 +718,16 @@ def generate_complete_output(user_input) -> dict:
 # TEST RUN
 # ============================================================
 
-<<<<<<< HEAD
-user_values = {
-    "fire": 12,
-    "earth": 36,
-    "air": 32,
-    "water": 20,
-    "cardinal": 32,
-    "fixed": 18,
-    "mutable": 20
-}
+# if __name__ == "__main__":
+#     user_values = {
+#         "fire": 23,
+#         "earth": 23,
+#         "air": 18,
+#         "water": 36,
+#         "cardinal": 32,
+#         "fixed": 18,
+#         "mutable": 20
+#     }
 
-output = generate_complete_output(user_values)
-print(json.dumps(output, indent=2))
-=======
-# user_values = {
-#     "fire": 23,
-#     "earth": 23,
-#     "air": 18,
-#     "water": 36,
-#     "cardinal": 32,
-#     "fixed": 18,
-#     "mutable": 20
-# }
-
-# output = generate_complete_output(user_values)
-
-# print(json.dumps(output, indent=2))
->>>>>>> 2784e536c8c052328ea23825dc326cfe7ce56ea3
+#     output = generate_complete_output(user_values)
+#     print(json.dumps(output, indent=2))

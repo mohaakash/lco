@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QFileDialog, QMessageBox)
 from PyQt6.QtCore import Qt, pyqtSignal
 import json
+import os
 from pathlib import Path
 import datetime
 
@@ -66,6 +67,13 @@ class ElementalAssessmentResultForm(QWidget):
         self.export_btn.clicked.connect(self.export_pdf)
         toolbar.addWidget(self.export_btn)
 
+        self.export_word_btn = QPushButton("Export Word")
+        self.export_word_btn.setFixedHeight(32)
+        self.export_word_btn.setStyleSheet(
+            "background-color:#2b5797; color:white; border-radius:6px; padding:6px 14px; margin-left: 10px;")
+        self.export_word_btn.clicked.connect(self.export_word)
+        toolbar.addWidget(self.export_word_btn)
+
         layout.addLayout(toolbar)
         layout.addWidget(title)
 
@@ -109,9 +117,13 @@ class ElementalAssessmentResultForm(QWidget):
         """)
         back_btn.clicked.connect(self.back_clicked.emit)
 
-        next_btn = QPushButton("Export Report")
-        next_btn.setFixedHeight(45)
-        next_btn.setStyleSheet("""
+        # Export Menu Button
+        from PyQt6.QtWidgets import QMenu
+        from PyQt6.QtGui import QAction
+        
+        self.export_menu_btn = QPushButton("Export Report")
+        self.export_menu_btn.setFixedHeight(45)
+        self.export_menu_btn.setStyleSheet("""
             QPushButton {
                 background-color: #3EACA8;
                 color: white;
@@ -124,12 +136,25 @@ class ElementalAssessmentResultForm(QWidget):
             QPushButton:hover {
                 background-color: #359B97;
             }
+            QPushButton::menu-indicator {
+                image: none;
+            }
         """)
-        next_btn.clicked.connect(self.next_clicked.emit)
+        
+        export_menu = QMenu(self)
+        pdf_action = QAction("Export as PDF", self)
+        pdf_action.triggered.connect(self.export_pdf)
+        word_action = QAction("Export as Word", self)
+        word_action.triggered.connect(self.export_word)
+        
+        export_menu.addAction(pdf_action)
+        export_menu.addAction(word_action)
+        
+        self.export_menu_btn.setMenu(export_menu)
 
         btn_layout.addWidget(back_btn)
         btn_layout.addStretch()
-        btn_layout.addWidget(next_btn)
+        btn_layout.addWidget(self.export_menu_btn)
         layout.addLayout(btn_layout)
 
         main_layout.addWidget(scroll)
@@ -459,22 +484,33 @@ class ElementalAssessmentResultForm(QWidget):
                 title = ''
                 content = ''
                 classification = ''
+                status = ''
+                percentage = ''
+                
                 if isinstance(el_data, dict):
-                    # generator shape
-                    title = el_data.get('Title') or el_data.get(
-                        'Classification') or ''
-                    content = el_data.get('Content') or el_data.get(
-                        'Description') or ''
+                    # generator shape or mapped shape
+                    title = el_data.get('Title') or el_data.get('Classification') or ''
+                    content = el_data.get('Content') or el_data.get('Description') or ''
                     classification = el_data.get('Classification', title)
+                    status = el_data.get('Status', '')
+                    percentage = el_data.get('Percentage', '')
                 else:
                     content = str(el_data)
 
-                el_header = QLabel(f"{el_name} — {classification}")
+                header_text = f"{el_name}"
+                if classification and classification != el_name:
+                    header_text += f" — {classification}"
+                if percentage:
+                    header_text += f" ({percentage}%)"
+                if status:
+                    header_text += f" [{status}]"
+
+                el_header = QLabel(header_text)
                 el_header.setStyleSheet(
                     "color:#333; font-weight:600; margin-top:10px;")
                 layout.addWidget(el_header)
 
-                if title:
+                if title and title != classification:
                     tlabel = QLabel(title)
                     tlabel.setStyleSheet(
                         "color:#006b6b; font-weight:600; margin-top:4px;")
@@ -504,15 +540,36 @@ class ElementalAssessmentResultForm(QWidget):
                 pct = ''
                 title = ''
                 content = ''
+                
                 if isinstance(mod_content, dict):
                     pct = mod_content.get('Percentage', '')
+                    # Check for nested content dict (from mapped structure)
+                    inner_content = mod_content.get('Content')
+                    if isinstance(inner_content, dict):
+                        # Render key-value pairs from the inner dict
+                        content_lines = []
+                        for k, v in inner_content.items():
+                            content_lines.append(f"{k}: {v}")
+                        content = "\n\n".join(content_lines)
+                    elif isinstance(inner_content, str):
+                        content = inner_content
+                    else:
+                        # Fallback for direct dict (legacy or unmapped)
+                        content_lines = []
+                        for k, v in mod_content.items():
+                            if k not in ('Percentage', 'Title', 'Content'):
+                                content_lines.append(f"{k}: {v}")
+                        if content_lines:
+                             content = "\n\n".join(content_lines)
+                        else:
+                             content = mod_content.get('Content', '')
+
                     title = mod_content.get('Title', '')
-                    content = mod_content.get('Content') or ""
                 else:
                     content = str(mod_content)
 
                 m_header = QLabel(
-                    f"{mod_name} {('— ' + str(pct)) if pct else ''}")
+                    f"{mod_name} {('— ' + str(pct) + '%') if pct else ''}")
                 m_header.setStyleSheet(
                     "color:#333; font-weight:600; margin-top:8px;")
                 layout.addWidget(m_header)
@@ -660,23 +717,46 @@ class ElementalAssessmentResultForm(QWidget):
             env = Environment(loader=FileSystemLoader(tpl_dir),
                               autoescape=select_autoescape(['html', 'xml']))
             template = env.get_template('report.html')
-            # Prepare context: ensure we pass a dict even if assessment_data is None
+            
+            # Prepare context
             ctx = dict(self.assessment_data or {})
-            # Provide a report_date
-            ctx.setdefault('report_date', datetime.date.today().isoformat())
+            ctx.setdefault('report_date', datetime.date.today().strftime("%B %d, %Y"))
+            
+            # Load images as base64
+            import base64
+            
+            def load_image_b64(filename):
+                try:
+                    img_path = Path(os.getcwd()) / 'images' / filename
+                    if img_path.exists():
+                        with open(img_path, "rb") as img_file:
+                            return base64.b64encode(img_file.read()).decode('utf-8')
+                except Exception as e:
+                    print(f"Error loading image {filename}: {e}")
+                return None
+
+            ctx['logo_png'] = load_image_b64('logo.png')
+            ctx['cover_image_png'] = load_image_b64('coverimage.png')
+            ctx['human_png'] = load_image_b64('human.png')
+
             full_html = template.render(**ctx)
+            
             # Emit HTML to parent for PDF generation/preview
             try:
                 self.export_requested.emit(
                     full_html, self.assessment_data or {})
                 return
             except Exception:
-                # If signal emit fails, fall through to saving the HTML below
                 pass
         except Exception as e:
             print(f"Template render failed: {e}")
+            import traceback
+            traceback.print_exc()
 
-        # Fallback: build a simple HTML representation from the report widgets
+        # Fallback
+        self._export_html_fallback()
+
+    def _export_html_fallback(self):
         html_parts = ["<html><head><meta charset='utf-8'></head><body>"]
         html_parts.append("<h1>Elemental Assessment Report</h1>")
         for w in getattr(self, 'report_text_widgets', []):
@@ -691,7 +771,6 @@ class ElementalAssessmentResultForm(QWidget):
         html_parts.append("</body></html>")
         full_html = "\n".join(html_parts)
 
-        # Offer to save HTML if we couldn't emit via signal
         fname, _ = QFileDialog.getSaveFileName(
             self, "Export Report HTML", "", "HTML Files (*.html)")
         if not fname:
@@ -703,6 +782,31 @@ class ElementalAssessmentResultForm(QWidget):
         except Exception as e:
             QMessageBox.critical(self, 'Export Failed',
                                  f'Could not save HTML: {e}')
+
+    def export_word(self):
+        """Export the report to a Word document (.docx)."""
+        fname, _ = QFileDialog.getSaveFileName(
+            self, "Export Report Word", "", "Word Files (*.docx)")
+        if not fname:
+            return
+        
+        try:
+            from ui.utils.docx_generator import DocxReportGenerator
+            generator = DocxReportGenerator(fname)
+            # Use current assessment data, potentially with edits
+            data = self.assessment_data or {}
+            # If in edit mode, try to capture latest edits
+            if getattr(self, '_editing_mode', False):
+                try:
+                    edited = self.get_edited_assessment_data()
+                    data.update(edited)
+                except Exception:
+                    pass
+            
+            generator.generate(data)
+            QMessageBox.information(self, 'Exported', f'Report saved to {fname}')
+        except Exception as e:
+            QMessageBox.critical(self, 'Export Failed', f'Could not save Word document: {e}')
 
     def get_edited_assessment_data(self):
         """Retrieve all edited data"""

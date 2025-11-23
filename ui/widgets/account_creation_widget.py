@@ -209,73 +209,117 @@ class AccountCreationWidget(QWidget):
                 return
 
             # Map AI output keys into the structure expected by the UI/template
+            # New JSON structure from ai/complete_report.py:
+            # "Element_Descriptions": {
+            #   "Fire": { "Title": "...", "Content": {...}, "Status": "...", "Percentage": ... },
+            #   ...
+            # }
             elemental_src = full_report.get("Element_Descriptions", {}) or {}
             elemental_map = {}
+            
             for ename, ed in elemental_src.items():
-                content = ed.get("Content") if isinstance(ed, dict) else ed
-                if not content:
-                    content = ed.get("Description") if isinstance(
-                        ed, dict) else ''
+                # ed is expected to be a dict with Title, Content, Status, Percentage
+                if not isinstance(ed, dict):
+                    continue
+                
+                content_data = ed.get("Content")
+                # Content might be a JSON string, a dict, or a plain string
+                description = ""
+                scientific = ""
+                imbalance = ""
+                remedies = {}
+                
+                if isinstance(content_data, dict):
+                    # It's already a parsed dict (e.g. from fire_high_fixed JSON)
+                    # We need to map keys from the JSON prompts to UI fields
+                    # Example keys in JSON: "The Fire Element", "Physique", "Temperament", "Diet", "Lifestyle and Exercise"
+                    
+                    # Heuristic mapping
+                    description = content_data.get("The Fire Element") or content_data.get("The Earth Element") or \
+                                  content_data.get("The Air Element") or content_data.get("The Water Element") or \
+                                  content_data.get("Description") or ""
+                                  
+                    scientific = content_data.get("Scientific Correlation") or "" # Not present in all, but good to have
+                    
+                    # Combine some fields for "Imbalance Effects" if not explicitly present
+                    imbalance_parts = []
+                    if content_data.get("What Low Fire Feels Like—and How It Holds You Back"):
+                        imbalance_parts.append(content_data.get("What Low Fire Feels Like—and How It Holds You Back"))
+                    if content_data.get("What Excess Fire Feels Like—and Why You Need to Rein It In"):
+                        imbalance_parts.append(content_data.get("What Excess Fire Feels Like—and Why You Need to Rein It In"))
+                    # ... add other element specific keys if needed, or generic "Imbalance"
+                    if content_data.get("Imbalance Effects"):
+                        imbalance_parts.append(content_data.get("Imbalance Effects"))
+                        
+                    imbalance = "\n\n".join(imbalance_parts)
+                    
+                    # Remedies
+                    remedies = {
+                        "Diet": content_data.get("Diet", ""),
+                        "Lifestyle_and_Exercise": content_data.get("Lifestyle and Exercise", ""),
+                        "Herbal_or_Energy_Support": content_data.get("Gems, Flower Remedies, and Aromas") or \
+                                                    content_data.get("Herbs") or \
+                                                    content_data.get("Crystals, Gems, and Herbal Remedies") or ""
+                    }
+                elif isinstance(content_data, str):
+                    description = content_data
+                
                 elemental_map[ename] = {
-                    "Classification": ed.get("Title", "") if isinstance(ed, dict) else "",
-                    "Description": content,
-                    "Scientific_Correlation": "",
-                    "Imbalance_Effects": "",
-                    "Remedies": {}
+                    "Classification": ed.get("Title", ""),
+                    "Description": description,
+                    "Scientific_Correlation": scientific,
+                    "Imbalance_Effects": imbalance,
+                    "Remedies": remedies,
+                    "Status": ed.get("Status", ""),
+                    "Percentage": ed.get("Percentage", 0)
                 }
 
             daily_src = full_report.get("Daily_Routine", {}) or {}
+            
+            # Modalities
             modalities_src = full_report.get("Modality_Descriptions", {}) or {}
             modalities_map = {}
-            try:
-                card_pct = float(cardinal)
-                fixed_pct = float(fixed)
-                mut_pct = float(mutable)
-            except Exception:
-                card_pct = fixed_pct = mut_pct = ""
-
+            
             for mname, mcontent in modalities_src.items():
-                pct = ''
-                if isinstance(mcontent, dict) and mcontent.get('Percentage'):
-                    pct = mcontent.get('Percentage')
-                if mname.lower().startswith('card'):
-                    pct = pct or card_pct
-                if mname.lower().startswith('fixed'):
-                    pct = pct or fixed_pct
-                if mname.lower().startswith('mut'):
-                    pct = pct or mut_pct
-
+                # mcontent is expected to be a dict (parsed JSON) or string
+                # Structure: "Cardinal": { "Cardinal_Energy": { "Cardinal Energy": "...", ... } } OR just the inner dict
+                
+                content_dict = {}
                 if isinstance(mcontent, dict):
-                    mm = dict(mcontent)
-                    mm['Percentage'] = pct
-                    modalities_map[mname] = mm
-                else:
-                    modalities_map[mname] = {
-                        "Percentage": pct, "Content": mcontent}
-
-            element_percentages = {"Fire": fire,
-                                   "Earth": earth, "Air": air, "Water": water}
+                    # Check if it's nested like {"Cardinal_Energy": {...}}
+                    if len(mcontent) == 1 and isinstance(list(mcontent.values())[0], dict):
+                        content_dict = list(mcontent.values())[0]
+                    else:
+                        content_dict = mcontent
+                
+                modalities_map[mname] = {
+                    "Content": content_dict, # Pass the whole dict for rendering
+                    "Percentage": full_report.get("Modalities_Percentages", {}).get(mname, 0)
+                }
 
             combined = {
                 "Elemental_Analysis": elemental_map,
                 "Daily_Guideline": daily_src,
                 "Modalities": modalities_map,
-                "Element_Percentages": element_percentages,
-                "Modalities_Percentages": {"Cardinal": card_pct, "Fixed": fixed_pct, "Mutable": mut_pct},
+                "Element_Percentages": full_report.get("Element_Percentages", {}),
+                "Modalities_Percentages": full_report.get("Modalities_Percentages", {}),
                 "Personal": personal,
-                "Summary": full_report.get("Summary", "AI generated assessment")
+                "Summary": full_report.get("Summary", "AI generated assessment"),
+                "Disclaimer": full_report.get("Disclaimer", "")
             }
-            combined["Element_Descriptions"] = full_report.get(
-                "Element_Descriptions", {})
+            
+            # Keep raw data too just in case
+            combined["Element_Descriptions"] = full_report.get("Element_Descriptions", {})
             combined["Daily_Routine"] = full_report.get("Daily_Routine", {})
-            combined["Modality_Descriptions"] = full_report.get(
-                "Modality_Descriptions", {})
+            combined["Modality_Descriptions"] = full_report.get("Modality_Descriptions", {})
 
             self.elemental_assessment_form.load_assessment_data(combined)
             self.show_assessment_result()
 
         except Exception as e:
             print(f"Error processing generated assessment: {e}")
+            import traceback
+            traceback.print_exc()
 
     def on_personal_details_next(self):
         """Collect personal details and elemental inputs, call AI functions,
