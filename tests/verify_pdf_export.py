@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 def test_pdf_template_rendering():
     print("Testing PDF template rendering...")
     
-    # Mock data
+    # Mock data with specific missing content cases
     data = {
         "Personal": {
             "name": "Test User",
@@ -19,11 +19,51 @@ def test_pdf_template_rendering():
             "time_of_birth": "12:00",
             "place_of_birth": "New York"
         },
-        "Element_Percentages": {"Fire": 40, "Water": 60},
+        "Element_Percentages": {"Fire": 10, "Water": 60, "Air": 15, "Earth": 15},
         "Element_Descriptions": {
-            "Fire": {"Title": "The Transformer", "Content": "Fire content...", "Status": "High", "Percentage": 40},
-            "Water": {"Title": "The Feeler", "Content": {"Description": "Water content..."}, "Status": "Balanced", "Percentage": 60}
+            "Fire": {
+                "Title": "The Transformer", 
+                "Content": {
+                    "Description": "Fire content...", 
+                    "What Low Fire Feels Like—and How It Holds You Back": "Low Fire description here."
+                }, 
+                "Status": "Low", 
+                "Percentage": 10
+            },
+            "Water": {
+                "water": {
+                    "high": {
+                        "The Water Element": "Water content...",
+                        "Excess Water": "Excess Water description here."
+                    }
+                },
+                "Status": "High", 
+                "Percentage": 60
+            },
+            "Air": {
+                "air": {
+                    "low": {
+                        "The Air Element": "Air content...",
+                        "Low Air": "Low Air description here."
+                    }
+                },
+                "Status": "Low", 
+                "Percentage": 15
+            }
         },
+        "Daily_Routine": {
+            "Morning": "Morning routine...",
+            "Weekly_Addition": "Weekly addition content here."
+        },
+        "Modality_Descriptions": {
+            "Cardinal": {
+                "Cardinal_Energy": {
+                    "Cardinal Energy": "Cardinal Energy Title Text",
+                    "General Traits": "Cardinal traits..."
+                }
+            }
+        },
+        "Modalities_Percentages": {"Cardinal": 50, "Fixed": 25, "Mutable": 25},
         "Summary": "Test Summary",
         "Disclaimer": "Test Disclaimer"
     }
@@ -61,6 +101,48 @@ def test_pdf_template_rendering():
         print(f"Success! Rendered HTML saved to {output_path}")
         print(f"HTML size: {len(output_html)} bytes")
         
+        # Check for specific missing content
+        if "Low Fire description here" in output_html:
+            print("Verified: Low Fire description present.")
+        else:
+            print("Error: Low Fire description MISSING.")
+
+        if "Excess Water description here" in output_html:
+            print("Verified: Excess Water description present.")
+        else:
+            print("Error: Excess Water description MISSING.")
+
+        if "Low Air description here" in output_html:
+            print("Verified: Low Air description present.")
+        else:
+            print("Error: Low Air description MISSING.")
+
+        if "Weekly addition content here" in output_html:
+            print("Verified: Weekly Addition present.")
+        else:
+            print("Error: Weekly Addition MISSING.")
+
+        if "Cardinal Energy Title Text" in output_html:
+            print("Verified: Cardinal Energy Title present.")
+        else:
+            print("Error: Cardinal Energy Title MISSING.")
+            
+        # Check for styling changes
+        if "text-align: right;" in output_html:
+             print("Verified: Header is right-aligned.")
+        else:
+             print("Error: Header alignment check failed.")
+
+        if "margin: 0 auto 20px auto;" in output_html:
+             print("Verified: Cover image has auto margins.")
+        else:
+             print("Error: Cover image auto margin check failed.")
+
+        if "color: darkblue;" in output_html:
+             print("Verified: Dark blue color found.")
+        else:
+             print("Error: Dark blue color check failed.")
+
         # Check for image inclusion
         if ctx['logo_png'] and ctx['logo_png'] in output_html:
             print("Logo image found in output.")

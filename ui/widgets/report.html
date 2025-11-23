@@ -8,7 +8,7 @@
             size: A4;
             margin: 20mm 20mm 20mm 20mm;
 
-            @top-center {
+            @top-right {
                 content: element(header);
             }
 
@@ -30,7 +30,7 @@
         /* Header & Footer */
         div.header {
             position: running(header);
-            text-align: center;
+            text-align: right;
             margin-bottom: 20px;
         }
 
@@ -59,8 +59,9 @@
         }
 
         .cover-image {
-            width: 400px;
-            margin-bottom: 20px;
+            width: 550px;
+            margin: 0 auto 20px auto;
+            display: block;
             border-radius: 8px;
         }
 
@@ -78,7 +79,7 @@
         /* Typography */
         h1 {
             font-size: 15px;
-            color: blue;
+            color: darkblue;
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 10px;
@@ -89,7 +90,7 @@
 
         h2 {
             font-size: 12px;
-            color: orange;
+            color: rgb(233, 151, 0);
             font-weight: bold;
             margin-top: 15px;
             margin-bottom: 5px;
@@ -109,7 +110,7 @@
         /* Special case for Modality Titles (Fixed/Mutable/Cardinal Energy) */
         .modality-title {
             font-size: 12px;
-            color: blue;
+            color: darkblue;
             font-weight: bold;
             margin-top: 10px;
             margin-bottom: 5px;
@@ -120,7 +121,7 @@
         }
 
         .blue-center {
-            color: blue;
+            color: darkblue;
             text-align: center;
             font-weight: bold;
             margin: 15px 0;
@@ -134,7 +135,7 @@
         }
 
         .elemental-blueprint span.label {
-            color: blue;
+            color: darkblue;
         }
 
         .elemental-blueprint span.value {
@@ -340,8 +341,19 @@
         <h2>The {{ el_name }} Element</h2>
 
         {# Extract content #}
+        {# Logic to handle nested structure from fixed JSONs (e.g. {'air': {'low': {...}}}) #}
+        {% set status = el_data.get('Status', 'Balanced') %}
+        {% set nested_content = el_data.get(el_name.lower()) %}
+        {% set content_raw = '' %}
+
+        {% if nested_content and (nested_content is mapping) %}
+        {# Try to get content for the specific status (low/high) #}
+        {% set content_raw = nested_content.get(status.lower()) or nested_content.get('balanced') or nested_content %}
+        {% else %}
+        {# Fallback to Content key or Description or the object itself #}
         {% set content_raw = el_data.get('Content') if (el_data is mapping) else (el_data.get('Description') if (el_data
         is mapping) else (el_data if not (el_data is mapping) else '')) %}
+        {% endif %}
 
         {% set description = '' %}
         {% set scientific = '' %}
@@ -355,16 +367,31 @@
         {% set scientific = content_raw.get('Scientific Correlation') or '' %}
 
         {% set imb_list = [] %}
-        {% if content_raw.get('What Low Fire Feels Like—and How It Holds You Back') %}{% set _ =
-        imb_list.append(content_raw.get('What Low Fire Feels Like—and How It Holds You Back')) %}{% endif %}
-        {% if content_raw.get('What Excess Fire Feels Like—and Why You Need to Rein It In') %}{% set _ =
-        imb_list.append(content_raw.get('What Excess Fire Feels Like—and Why You Need to Rein It In')) %}{% endif %}
+        {# Fire/Earth keys #}
+        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back') %}{% set _ =
+        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back')) %}{% endif %}
+        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You') %}{% set _ =
+        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You')) %}{% endif %}
+        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In') %}{% set _ =
+        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In')) %}{%
+        endif %}
+        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up') %}{% set _ =
+        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up')) %}{%
+        endif %}
+
+        {# Air/Water keys #}
+        {% if content_raw.get('Low ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Low ' + el_name)) %}{%
+        endif %}
+        {% if content_raw.get('Excess ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Excess ' + el_name))
+        %}{% endif %}
+
         {% if content_raw.get('Imbalance Effects') %}{% set _ = imb_list.append(content_raw.get('Imbalance Effects'))
         %}{% endif %}
         {% set imbalance = imb_list|join('<br><br>') %}
 
         {% set diet = content_raw.get('Diet') or '' %}
-        {% set lifestyle = content_raw.get('Lifestyle and Exercise') or '' %}
+        {% set lifestyle = content_raw.get('Lifestyle and Exercise') or content_raw.get('Lifestyle and Exercise
+        Recommendations') or '' %}
         {% set herbal = content_raw.get('Gems, Flower Remedies, and Aromas') or content_raw.get('Herbs') or
         content_raw.get('Crystals, Gems, and Herbal Remedies') or '' %}
         {% set remedies = {'Diet': diet, 'Lifestyle_and_Exercise': lifestyle, 'Herbal_or_Energy_Support': herbal} %}
@@ -423,9 +450,9 @@
         {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is defined)
         else {}) %}
 
-        {% for period in ['Morning', 'Midday', 'Evening', 'Weekly Additions'] %}
+        {% for period in ['Morning', 'Midday', 'Evening', 'Weekly_Addition'] %}
         {% if dg.get(period) %}
-        <h2>{{ period }}</h2>
+        <h2>{{ period|replace('_', ' ') }}</h2>
         {% set content = dg.get(period) %}
         {% if content is mapping %}
         <table>
@@ -466,21 +493,28 @@
         defined) else {}) %}
 
         {% for mname, mcontent in mods.items() %}
-        {% set title = mcontent.get('Title') if (mcontent is mapping) else '' %}
-        {% if title %}
-        <div class="modality-title">{{ title }}</div>
+        {# mcontent is typically {"Cardinal_Energy": {...}} #}
+        {% set inner_dict = mcontent.get(mname + '_Energy') or mcontent %}
+
+        {# Try to find the title key which is usually "Cardinal Energy", "Fixed Energy" etc #}
+        {% set title_key = mname + ' Energy' %}
+        {% set title_text = inner_dict.get(title_key) %}
+
+        {% if title_text %}
+        <div class="modality-title">{{ title_key }}</div>
+        <p>{{ title_text }}</p>
         {% else %}
         <div class="modality-title">{{ mname }} Energy</div>
         {% endif %}
 
-        {% set inner_content = mcontent.get('Content') if (mcontent is mapping) else mcontent %}
-
-        {% if inner_content is mapping %}
-        {% for k,v in inner_content.items() %}
+        {% if inner_dict is mapping %}
+        {% for k,v in inner_dict.items() %}
+        {% if k != title_key %}
         <p><strong>{{ k.replace('_',' ') }}:</strong> {{ v }}</p>
+        {% endif %}
         {% endfor %}
         {% else %}
-        <p>{{ inner_content }}</p>
+        <p>{{ inner_dict }}</p>
         {% endif %}
         {% endfor %}
     </div>

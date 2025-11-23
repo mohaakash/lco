@@ -306,8 +306,10 @@ water_high_fixed = """{
       "Excess Water": "With an excess of water in the chart you can appear to others as dreamy and spacey. You're highly emotional and can become defensive at times. You are prone to depression and moodiness. You need to learn detachment. You need to use psychic self defence to avoid picking up negative vibrations around you. You can learn to channel your emotions in a positive way by getting involved in a creative project. Because water is cold, wet and heavy, an excess can contribute to phlegm and mucus discharges in the body which affect the lungs and throat. You may be prone to colds and lymphatic congestion. Excess water aids in eliminating toxins from the body, but you can become waterlogged and overweight. You are prone to diseases involving discharges or a buildup of fluids in the body. You can be overly sensitive to pollutants in the air, leading to allergies. Where there is excess water, it can lead to being overweight and laziness, but the weight is not due to fat; the body is simply waterlogged. Davidson suggests that over-watery people benefit from living by the sea and breathing salty air. This draws the water, by osmosis, out of the lungs and into the bronchial tree, where it can be coughed up and removed from the body. When there is an excess or imbalance of water it can lead to greed, clinginess and possessiveness caused by insecurity. Everything is seen and valued subjectively, and this may be quite at odds with external reality and other people’s view of what is taking place. It is hard for water to be objective. The memory is retentive, which contrasts strongly with air which rules short-term memory.",
       "Remedies to Balance Excess Water": "Balancing excess Water requires heat, dryness, metabolism activation, emotional boundaries, and reducing moisture accumulation. Warm environments, grounding practices, and structured routines strengthen the system.",
       "Diet": "The best we can do is evaporate water by eating warm and dry foods. It's recommended to eat mostly cooked foods with some spicy additions. Drinking diuretic herbal teas such as dandelion leaf, nettle, and alfalfa can be beneficial. The consumption of sweets and dairy products should be kept low. Foods that retain water, such as bread and salt, and especially melons, should also be kept at a minimum. The heaviness of water needs to be balanced by lighter foods such as dried fruits and salads and hot spices such as cayenne and ginger. Eating brittle foods that crumble, such as crackers and chips, helps reduce excess water. Hot and dry foods against excess water: peppers, onions, garlic, ginger, curry, honey, horseradish, cinnamon, nutmeg, mustard, unrefined sugar, salt, (especially sea salt), winter radish, paprika powder, dried dates, walnuts, hazelnuts, pistachio nuts, parsley, radish, carrots, fennel, leeks, parsnips, asparagus, celeriac, orange and lemon peel, aniseed, old cheeses, artichokes, pure chocolate, aubergines, black olives, salted fish, maize, red wine, basmati rice, oats, goat meat, mutton, bacon, salt meats, all hot spicy foods.",
-      "Lifestyle and Exercise": "You would benefit from avoiding cold, look for heat sources outside the body like a hearth fire, no bathing, fasting (heats you up), regular exercise to activate your metabolism. Don't sleep too long. Someone suffering from water excess should not exercise too much (and I have seen such cases!). Sport and competition consumes lots of heat, and in phlegmatic/water conditions there is not enough heat as it is, so we should not use all of it up. Fanatical exercise will maintain the diseased, unbalanced condition. A sauna is useful but one must stay in the sauna for long, to really heat up and sweat out the excess moisture. Flower remedies like honeysuckle, red chestnut, chamomile, clematis, and pink yarrow are suggested for emotional sensitivity and psychic protection. Crystals such as rose quartz, kunzite, pink tourmaline, and green aventurine are soothing and healing for the emotions, while amethyst, fluorite, and sugilite work with emotions on a higher plane. In Ch
-
+      "Lifestyle and Exercise": "You would benefit from avoiding cold, look for heat sources outside the body like a hearth fire, no bathing, fasting (heats you up), regular exercise to activate your metabolism. Don't sleep too long. Someone suffering from water excess should not exercise too much (and I have seen such cases!). Sport and competition consumes lots of heat, and in phlegmatic/water conditions there is not enough heat as it is, so we should not use all of it up. Fanatical exercise will maintain the diseased, unbalanced condition. A sauna is useful but one must stay in the sauna for long, to really heat up and sweat out the excess moisture. Flower remedies like honeysuckle, red chestnut, chamomile, clematis, and pink yarrow are suggested for emotional sensitivity and psychic protection. Crystals such as rose quartz, kunzite, pink tourmaline, and green aventurine are soothing and healing for the emotions, while amethyst, fluorite, and sugilite work with emotions on a higher plane. In Chinese medicine, working with the lung and large intestine meridians (Air elements) can stimulate the Water element."
+    }
+  }
+}
 """
 
 # MODALITY DESCRIPTIONS (NOT SENT TO GEMINI)
@@ -718,16 +720,16 @@ def generate_complete_output(user_input) -> dict:
 # TEST RUN
 # ============================================================
 
-# if __name__ == "__main__":
-#     user_values = {
-#         "fire": 23,
-#         "earth": 23,
-#         "air": 18,
-#         "water": 36,
-#         "cardinal": 32,
-#         "fixed": 18,
-#         "mutable": 20
-#     }
+if __name__ == "__main__":
+    user_values = {
+        "fire": 23,
+        "earth": 23,
+        "air": 18,
+        "water": 36,
+        "cardinal": 32,
+        "fixed": 18,
+        "mutable": 20
+    }
 
-#     output = generate_complete_output(user_values)
-#     print(json.dumps(output, indent=2))
+    output = generate_complete_output(user_values)
+    print(json.dumps(output, indent=2))
