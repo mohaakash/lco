@@ -1,17 +1,35 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QLineEdit, QPushButton, QComboBox, QFrame, QStackedWidget)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal, QThread
 from PyQt6.QtGui import QFont
 from ui.widgets.step_indicator import StepIndicator
 from ui.widgets.custom_input import CustomInput, PhoneInput, HelpIcon
 from ui.widgets.personal_details_form import PersonalDetailsForm
-from ui.widgets.health_history_form import HealthHistoryForm
 from ui.widgets.elemental_assessment_result_form import ElementalAssessmentResultForm
 from ui.widgets.pdf_preview_widget import PdfPreviewWidget
-from ai.elemental_assesment import generate_elemental_report, generate_daily_guideline
-from ai.elemental_quality import generate_modality_report
+from ai.complete_report import generate_complete_output
 import tempfile
 import os
+
+
+class ReportWorker(QThread):
+    """Background worker that runs the slow generate_complete_output call."""
+    result_ready = pyqtSignal(dict)
+
+    def __init__(self, user_input):
+        super().__init__()
+        self.user_input = user_input
+
+    def run(self):
+        try:
+            result = generate_complete_output(self.user_input)
+        except Exception as e:
+            result = {"__error": True, "error_message": str(e)}
+        # emit result (in main thread)
+        try:
+            self.result_ready.emit(result)
+        except Exception:
+            pass
 
 
 class AccountCreationWidget(QWidget):
@@ -131,61 +149,186 @@ class AccountCreationWidget(QWidget):
         self.stacked_widget.setCurrentIndex(1)
         self.step_indicator.set_active_step(2)
 
-    def on_personal_details_next(self):
-        """Collect personal details and elemental inputs, call AI functions,
-        and show the assessment result page."""
+    # --- Loading overlay helpers ---
+    def _create_loading_overlay(self):
+        """Create a semi-transparent overlay with a loading message."""
+        overlay = QWidget(self)
+        overlay.setObjectName("loading_overlay")
+        overlay.setStyleSheet("background: rgba(0,0,0,0.45);")
+        overlay.setGeometry(self.rect())
+        layout = QVBoxLayout(overlay)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label = QLabel("Please wait report is generating")
+        label.setStyleSheet("color: white; font-size: 18px; font-weight: 600;")
+        layout.addWidget(label)
+        overlay.setVisible(False)
+        return overlay
+
+    def _show_loading(self):
+        if not hasattr(self, '_loading_overlay'):
+            self._loading_overlay = self._create_loading_overlay()
+        self._loading_overlay.setGeometry(self.rect())
+        self._loading_overlay.setVisible(True)
+
+    def _hide_loading(self):
+        if hasattr(self, '_loading_overlay'):
+            self._loading_overlay.setVisible(False)
+
+    def _on_generation_finished(self, full_report: dict, personal, fire, earth, air, water, cardinal, fixed, mutable):
+        """Handle the report generation result emitted from the background worker."""
         try:
-            pd = self.personal_details_form
-
-            # Personal identity/contact
-            personal = {
-                "name": pd.full_name.text(),
-                "date_of_birth": pd.date_of_birth.text(),
-                "time_of_birth": pd.time_of_birth.text(),
-                "place_of_birth": pd.place_of_birth.text(),
-                "phone": pd.phone.text(),
-                "email": pd.email.text(),
-            }
-
-            # Element percentages
-            fire = int(pd.fire_element.text() or 0)
-            earth = int(pd.earth_element.text() or 0)
-            air = int(pd.air_element.text() or 0)
-            water = int(pd.water_element.text() or 0)
-
-            # Qualities
-            cardinal = int(pd.cardinal_quality.text() or 0)
-            fixed = int(pd.fixed_quality.text() or 0)
-            mutable = int(pd.mutable_quality.text() or 0)
-
-            # Call AI functions
-            elemental_report = generate_elemental_report(
-                fire, earth, air, water)
-            modality_report = generate_modality_report(
-                cardinal, fixed, mutable)
-
-            # daily guideline uses user input and elemental report
+            # hide loading
+            self._hide_loading()
             try:
-                daily_guideline = generate_daily_guideline(
-                    {"fire": fire, "earth": earth, "air": air, "water": water}, elemental_report)
+                self.personal_details_form.next_btn.setEnabled(True)
             except Exception:
-                daily_guideline = {}
+                pass
 
-            # Combine into a single payload for the result form
+            # if error returned, show minimal feedback and abort
+            if not isinstance(full_report, dict) or full_report.get("__error"):
+                print("Report generation failed:", full_report.get(
+                    "error_message") if isinstance(full_report, dict) else full_report)
+                # still show assessment page with fallback message
+                combined = {
+                    "Elemental_Analysis": {},
+                    "Daily_Guideline": {},
+                    "Modalities": {},
+                    "Element_Percentages": {"Fire": fire, "Earth": earth, "Air": air, "Water": water},
+                    "Modalities_Percentages": {"Cardinal": cardinal, "Fixed": fixed, "Mutable": mutable},
+                    "Personal": personal,
+                    "Summary": "Report generation failed. Please try again later."
+                }
+                combined["Element_Descriptions"] = full_report.get(
+                    "Element_Descriptions", {}) if isinstance(full_report, dict) else {}
+                combined["Daily_Routine"] = full_report.get(
+                    "Daily_Routine", {}) if isinstance(full_report, dict) else {}
+                combined["Modality_Descriptions"] = full_report.get(
+                    "Modality_Descriptions", {}) if isinstance(full_report, dict) else {}
+                self.elemental_assessment_form.load_assessment_data(combined)
+                self.show_assessment_result()
+                return
+
+            # Map AI output keys into the structure expected by the UI/template
+            elemental_src = full_report.get("Element_Descriptions", {}) or {}
+            elemental_map = {}
+            for ename, ed in elemental_src.items():
+                content = ed.get("Content") if isinstance(ed, dict) else ed
+                if not content:
+                    content = ed.get("Description") if isinstance(
+                        ed, dict) else ''
+                elemental_map[ename] = {
+                    "Classification": ed.get("Title", "") if isinstance(ed, dict) else "",
+                    "Description": content,
+                    "Scientific_Correlation": "",
+                    "Imbalance_Effects": "",
+                    "Remedies": {}
+                }
+
+            daily_src = full_report.get("Daily_Routine", {}) or {}
+            modalities_src = full_report.get("Modality_Descriptions", {}) or {}
+            modalities_map = {}
+            try:
+                card_pct = float(cardinal)
+                fixed_pct = float(fixed)
+                mut_pct = float(mutable)
+            except Exception:
+                card_pct = fixed_pct = mut_pct = ""
+
+            for mname, mcontent in modalities_src.items():
+                pct = ''
+                if isinstance(mcontent, dict) and mcontent.get('Percentage'):
+                    pct = mcontent.get('Percentage')
+                if mname.lower().startswith('card'):
+                    pct = pct or card_pct
+                if mname.lower().startswith('fixed'):
+                    pct = pct or fixed_pct
+                if mname.lower().startswith('mut'):
+                    pct = pct or mut_pct
+
+                if isinstance(mcontent, dict):
+                    mm = dict(mcontent)
+                    mm['Percentage'] = pct
+                    modalities_map[mname] = mm
+                else:
+                    modalities_map[mname] = {
+                        "Percentage": pct, "Content": mcontent}
+
+            element_percentages = {"Fire": fire,
+                                   "Earth": earth, "Air": air, "Water": water}
+
             combined = {
-                "Elemental_Analysis": elemental_report if isinstance(elemental_report, dict) else {},
-                "Modalities": modality_report,
-                "Daily_Guideline": daily_guideline,
+                "Elemental_Analysis": elemental_map,
+                "Daily_Guideline": daily_src,
+                "Modalities": modalities_map,
+                "Element_Percentages": element_percentages,
+                "Modalities_Percentages": {"Cardinal": card_pct, "Fixed": fixed_pct, "Mutable": mut_pct},
                 "Personal": personal,
-                "Summary": "AI generated assessment"
+                "Summary": full_report.get("Summary", "AI generated assessment")
             }
+            combined["Element_Descriptions"] = full_report.get(
+                "Element_Descriptions", {})
+            combined["Daily_Routine"] = full_report.get("Daily_Routine", {})
+            combined["Modality_Descriptions"] = full_report.get(
+                "Modality_Descriptions", {})
 
-            # Load into assessment form and show
             self.elemental_assessment_form.load_assessment_data(combined)
             self.show_assessment_result()
 
         except Exception as e:
-            print(f"Error generating AI assessment: {e}")
+            print(f"Error processing generated assessment: {e}")
+
+    def on_personal_details_next(self):
+        """Collect personal details and elemental inputs, call AI functions,
+        and show the assessment result page."""
+        # Collect user input and run generation in a background thread to keep UI responsive
+        pd = self.personal_details_form
+
+        # Personal identity/contact
+        personal = {
+            "name": pd.full_name.text(),
+            "date_of_birth": pd.date_of_birth.text(),
+            "time_of_birth": pd.time_of_birth.text(),
+            "place_of_birth": pd.place_of_birth.text(),
+            "phone": pd.phone.text(),
+            "email": pd.email.text(),
+        }
+
+        # Element percentages
+        fire = float(pd.fire_element.text() or 0)
+        earth = float(pd.earth_element.text() or 0)
+        air = float(pd.air_element.text() or 0)
+        water = float(pd.water_element.text() or 0)
+
+        # Qualities
+        cardinal = float(pd.cardinal_quality.text() or 0)
+        fixed = float(pd.fixed_quality.text() or 0)
+        mutable = float(pd.mutable_quality.text() or 0)
+
+        # Build user input for the single canonical report generator
+        user_input = {
+            "fire": fire,
+            "earth": earth,
+            "air": air,
+            "water": water,
+            "cardinal": cardinal,
+            "fixed": fixed,
+            "mutable": mutable,
+        }
+
+        # show loading overlay
+        self._show_loading()
+        # disable next button to avoid duplicate clicks
+        try:
+            self.personal_details_form.next_btn.setEnabled(False)
+        except Exception:
+            pass
+
+        # start background worker
+        self._worker = ReportWorker(user_input)
+        self._worker.result_ready.connect(lambda result: self._on_generation_finished(
+            result, personal, fire, earth, air, water, cardinal, fixed, mutable))
+        self._worker.finished.connect(lambda: None)
+        self._worker.start()
 
     def on_assessment_next(self):
         """Handle next button on assessment form"""

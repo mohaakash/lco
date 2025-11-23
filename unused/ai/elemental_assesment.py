@@ -116,7 +116,6 @@ To maintain balance:
 
 [SECTION: Summary Insight]
 Balanced Fire supports joy, clarity, purpose, and immunity. Maintenance focuses on preventing overheating through moderation.
-
 """
 
 # EARTH PROMPTS
@@ -134,7 +133,6 @@ Earth offers stability, nourishment, structure, routine, discipline, and physica
 - Unrealistic planning.
 - Disorganization.
 - Escapism.
-- Emotional inconsistency.
 
 [SECTION: Strengthening Strategies]
 Diet:
@@ -212,7 +210,7 @@ Balanced Earth brings endurance, stability, practicality, discipline, good diges
 - Mix grounding with periodic lightness (air/movement).
 
 [SECTION: If Air = Balanced (23–28%)]
-Introduce harmonizing insights:
+- Introduce harmonizing insights:
 - Air adds flexibility, creativity, mental clarity.
 - Combined Earth + Air balance = adaptable consistency without rigidity.
 
@@ -220,9 +218,8 @@ Introduce harmonizing insights:
 Balanced Earth is stable, steady, and dependable—maintenance requires avoiding stagnation.
 
 """
-
-# AIR PROMPTS
-air_low = """[SECTION: Element Overview]
+air_low = """
+[SECTION: Element Overview]
 Air governs movement, communication, perception, nervous system activity, and circulation. Low Air generates heaviness, introversion, sluggish thinking, and poor movement.
 
 [SECTION: Physical Indicators]
@@ -299,8 +296,8 @@ TCM:
 
 [SECTION: Summary Insight]
 High Air requires grounding, moisture, warmth, and slower rhythms to stabilize the overactive mind.
-"""
 
+"""
 air_balanced = """
 [SECTION: Element Overview]
 Balanced Air shows clear perception, fluid communication, emotional lightness, and effective nervous-system function.
@@ -395,6 +392,7 @@ TCM:
 
 [SECTION: Summary Insight]
 Excess Water = emotional/physical heaviness. Dryness, heat, structure, and emotional boundaries restore balance.
+
 """
 water_balanced = """[SECTION: Element Overview]
 Balanced Water offers emotional sensitivity, intuition, creativity, softness, cohesion, and gentle perception.
@@ -409,9 +407,6 @@ Balanced Water offers emotional sensitivity, intuition, creativity, softness, co
 If Water is balanced:
 - Enhance intuition through creative arts.
 - Maintain fluidity through hydration and gentle movement.
-
-If combined with Balanced Air:
-- Harmonizes emotional intelligence with mental clarity.
 
 [SECTION: Summary Insight]
 Balanced Water = empathy, intuition, serenity, and emotional resilience.
@@ -642,19 +637,19 @@ Generate the structured JSON guideline now.
 # # ----------------------------
 # # 6. EXAMPLE CALL
 # # ----------------------------
-# user_input = {
-#     "fire": 32,
-#     "earth": 12,
-#     "air": 28,
-#     "water": 28
-# }
-
-# first_report = generate_elemental_report(
-#     fire=32, earth=12, air=28, water=28
-# )
-
-# print(json.dumps(first_report, indent=2))
-
-# daily_guideline = generate_daily_guideline(user_input, first_report)
-
-# print(json.dumps(daily_guideline, indent=2))
+# # user_input = {
+# #     "fire": 32,
+# #     "earth": 12,
+# #     "air": 28,
+# #     "water": 28
+# # }
+# #
+# # first_report = generate_elemental_report(
+# #     fire=32, earth=12, air=28, water=28
+# # )
+# #
+# # print(json.dumps(first_report, indent=2))
+# #
+# # daily_guideline = generate_daily_guideline(user_input, first_report)
+# #
+# # print(json.dumps(daily_guideline, indent=2))

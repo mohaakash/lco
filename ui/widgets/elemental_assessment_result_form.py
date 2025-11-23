@@ -4,6 +4,10 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
 from PyQt6.QtCore import Qt, pyqtSignal
 import json
 from pathlib import Path
+import datetime
+
+# Template rendering
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 class ElementalAssessmentResultForm(QWidget):
@@ -405,14 +409,44 @@ class ElementalAssessmentResultForm(QWidget):
             "color: #555; font-size: 12px; margin-top:8px; margin-bottom:12px;")
         layout.addWidget(header)
 
+        # Show element percentages and modality percentages (if provided)
+        ep = data.get("Element_Percentages") or {}
+        mp = data.get("Modalities_Percentages") or {}
+        if ep or mp:
+            perc_layout = QHBoxLayout()
+            perc_layout.setSpacing(12)
+            perc_label = QLabel("Element Percentages:")
+            perc_label.setStyleSheet("color:#333; font-weight:600;")
+            perc_layout.addWidget(perc_label)
+            # Add element percents
+            for k in ("Fire", "Earth", "Air", "Water"):
+                if k in ep:
+                    l = QLabel(f"{k}: {ep.get(k)}%")
+                    l.setStyleSheet("color:#666; font-size:12px;")
+                    perc_layout.addWidget(l)
+
+            # Add modality percentages
+            if mp:
+                spacer = QLabel("    ")
+                perc_layout.addWidget(spacer)
+                for mk in ("Cardinal", "Fixed", "Mutable"):
+                    if mk in mp:
+                        lm = QLabel(f"{mk}: {mp.get(mk)}%")
+                        lm.setStyleSheet("color:#666; font-size:12px;")
+                        perc_layout.addWidget(lm)
+
+            perc_layout.addStretch()
+            layout.addLayout(perc_layout)
+
         # Divider
         div = QFrame()
         div.setFrameShape(QFrame.Shape.HLine)
         div.setStyleSheet("background-color: #DDDDDD; margin-bottom:12px;")
         layout.addWidget(div)
 
-        # Elemental Analysis
-        elem = data.get("Elemental_Analysis") or data.get(
+        # Elemental Analysis -- prefer generator's `Element_Descriptions`, fall back to
+        # legacy `Elemental_Analysis` shape.
+        elem = data.get("Element_Descriptions") or data.get("Elemental_Analysis") or data.get(
             "Elemental Analysis") or {}
         if elem:
             section_label = QLabel("Elemental Analysis")
@@ -421,40 +455,45 @@ class ElementalAssessmentResultForm(QWidget):
             layout.addWidget(section_label)
 
             for el_name, el_data in elem.items():
-                el_header = QLabel(
-                    f"{el_name} — {el_data.get('Classification', '')}")
+                # Support both shapes: {Title, Content} (generator) or the older mapped dict
+                title = ''
+                content = ''
+                classification = ''
+                if isinstance(el_data, dict):
+                    # generator shape
+                    title = el_data.get('Title') or el_data.get(
+                        'Classification') or ''
+                    content = el_data.get('Content') or el_data.get(
+                        'Description') or ''
+                    classification = el_data.get('Classification', title)
+                else:
+                    content = str(el_data)
+
+                el_header = QLabel(f"{el_name} — {classification}")
                 el_header.setStyleSheet(
                     "color:#333; font-weight:600; margin-top:10px;")
                 layout.addWidget(el_header)
 
-                parts = []
-                for key in ("Description", "Scientific_Correlation", "Imbalance_Effects"):
-                    if el_data.get(key):
-                        parts.append(
-                            f"<b>{key.replace('_', ' ')}</b>: {el_data.get(key)}")
+                if title:
+                    tlabel = QLabel(title)
+                    tlabel.setStyleSheet(
+                        "color:#006b6b; font-weight:600; margin-top:4px;")
+                    layout.addWidget(tlabel)
 
-                remedies = el_data.get("Remedies") or {}
-                if remedies:
-                    rem_parts = []
-                    for rk in ("Diet", "Lifestyle_and_Exercise", "Herbal_or_Energy_Support"):
-                        if remedies.get(rk):
-                            rem_parts.append(
-                                f"<b>{rk.replace('_', ' ')}</b>: {remedies.get(rk)}")
-                    if rem_parts:
-                        parts.append("<b>Remedies</b>:<br>" +
-                                     "<br>".join(rem_parts))
+                if content:
+                    el_text = QTextEdit()
+                    el_text.setReadOnly(True)
+                    # Content can be long; preserve paragraphs
+                    el_text.setPlainText(content)
+                    el_text.setStyleSheet(
+                        "padding:10px; border:1px solid #DDDDDD; border-radius:6px;")
+                    el_text.setMinimumHeight(140)
+                    layout.addWidget(el_text)
+                    self.report_text_widgets.append(el_text)
 
-                el_text = QTextEdit()
-                el_text.setReadOnly(True)
-                el_text.setHtml("<br><br>".join(parts))
-                el_text.setStyleSheet(
-                    "padding:10px; border:1px solid #DDDDDD; border-radius:6px;")
-                el_text.setMinimumHeight(120)
-                layout.addWidget(el_text)
-                self.report_text_widgets.append(el_text)
-
-        # Modalities
-        modalities = data.get("Modalities") or {}
+        # Modalities (qualities) -- prefer generator's `Modality_Descriptions` then `Modalities`
+        modalities = data.get("Modality_Descriptions") or data.get(
+            "Modalities") or {}
         if modalities and isinstance(modalities, dict):
             mod_label = QLabel("Modalities & Qualities")
             mod_label.setStyleSheet(
@@ -463,34 +502,39 @@ class ElementalAssessmentResultForm(QWidget):
 
             for mod_name, mod_content in modalities.items():
                 pct = ''
+                title = ''
+                content = ''
                 if isinstance(mod_content, dict):
                     pct = mod_content.get('Percentage', '')
+                    title = mod_content.get('Title', '')
+                    content = mod_content.get('Content') or ""
+                else:
+                    content = str(mod_content)
 
-                m_header = QLabel(f"{mod_name} {('— ' + pct) if pct else ''}")
+                m_header = QLabel(
+                    f"{mod_name} {('— ' + str(pct)) if pct else ''}")
                 m_header.setStyleSheet(
                     "color:#333; font-weight:600; margin-top:8px;")
                 layout.addWidget(m_header)
 
-                html_parts = []
-                if isinstance(mod_content, dict):
-                    for k, v in mod_content.items():
-                        if k == 'Percentage' or not v:
-                            continue
-                        html_parts.append(f"<b>{k.replace('_', ' ')}</b>: {v}")
-                else:
-                    html_parts.append(str(mod_content))
+                if title:
+                    t = QLabel(title)
+                    t.setStyleSheet(
+                        "color:#006b6b; font-weight:600; margin-top:4px;")
+                    layout.addWidget(t)
 
-                m_text = QTextEdit()
-                m_text.setReadOnly(True)
-                m_text.setHtml("<br><br>".join(html_parts))
-                m_text.setStyleSheet(
-                    "padding:10px; border:1px solid #DDDDDD; border-radius:6px;")
-                m_text.setMinimumHeight(110)
-                layout.addWidget(m_text)
-                self.report_text_widgets.append(m_text)
+                if content:
+                    m_text = QTextEdit()
+                    m_text.setReadOnly(True)
+                    m_text.setPlainText(content)
+                    m_text.setStyleSheet(
+                        "padding:10px; border:1px solid #DDDDDD; border-radius:6px;")
+                    m_text.setMinimumHeight(110)
+                    layout.addWidget(m_text)
+                    self.report_text_widgets.append(m_text)
 
-        # Daily Guideline
-        daily = data.get("Daily_Guideline") or {}
+        # Daily Guideline / Daily Routine - generator uses `Daily_Routine`, template uses `Daily_Guideline`
+        daily = data.get("Daily_Routine") or data.get("Daily_Guideline") or {}
         if daily and isinstance(daily, dict):
             daily_label = QLabel("Daily Guideline")
             daily_label.setStyleSheet(
@@ -512,7 +556,8 @@ class ElementalAssessmentResultForm(QWidget):
                             f"<b>{ck.replace('_', ' ')}</b>: {cv}")
                     p_text = QTextEdit()
                     p_text.setReadOnly(True)
-                    p_text.setHtml("<br><br>".join(html_parts))
+                    p_text.setPlainText("\n\n".join(
+                        [f"{ck.replace('_', ' ')}: {cv}" for ck, cv in content.items() if cv]))
                     p_text.setStyleSheet(
                         "padding:10px; border:1px solid #DDDDDD; border-radius:6px;")
                     p_text.setMinimumHeight(120)
@@ -608,14 +653,34 @@ class ElementalAssessmentResultForm(QWidget):
 
     def export_pdf(self):
         """Export the currently rendered report to PDF (or HTML fallback)."""
-        # Build a simple HTML representation from the report widgets
+        # Prefer rendering the Jinja2 template (report.html) using assessment_data
+        try:
+            tpl_path = Path(__file__).parent / 'report.html'
+            tpl_dir = str(tpl_path.parent)
+            env = Environment(loader=FileSystemLoader(tpl_dir),
+                              autoescape=select_autoescape(['html', 'xml']))
+            template = env.get_template('report.html')
+            # Prepare context: ensure we pass a dict even if assessment_data is None
+            ctx = dict(self.assessment_data or {})
+            # Provide a report_date
+            ctx.setdefault('report_date', datetime.date.today().isoformat())
+            full_html = template.render(**ctx)
+            # Emit HTML to parent for PDF generation/preview
+            try:
+                self.export_requested.emit(
+                    full_html, self.assessment_data or {})
+                return
+            except Exception:
+                # If signal emit fails, fall through to saving the HTML below
+                pass
+        except Exception as e:
+            print(f"Template render failed: {e}")
+
+        # Fallback: build a simple HTML representation from the report widgets
         html_parts = ["<html><head><meta charset='utf-8'></head><body>"]
-        # Title
         html_parts.append("<h1>Elemental Assessment Report</h1>")
-        # Include the content of each report widget
         for w in getattr(self, 'report_text_widgets', []):
             try:
-                # Prefer rich HTML when available
                 html_parts.append(w.toHtml())
             except Exception:
                 try:
@@ -625,24 +690,19 @@ class ElementalAssessmentResultForm(QWidget):
 
         html_parts.append("</body></html>")
         full_html = "\n".join(html_parts)
-        # Emit HTML to parent for PDF generation/preview
-        try:
-            self.export_requested.emit(full_html, self.assessment_data or {})
+
+        # Offer to save HTML if we couldn't emit via signal
+        fname, _ = QFileDialog.getSaveFileName(
+            self, "Export Report HTML", "", "HTML Files (*.html)")
+        if not fname:
             return
-        except Exception:
-            # Fallback to saving HTML directly if emit failed
-            fname, _ = QFileDialog.getSaveFileName(
-                self, "Export Report HTML", "", "HTML Files (*.html)")
-            if not fname:
-                return
-            try:
-                with open(fname, 'w', encoding='utf-8') as f:
-                    f.write(full_html)
-                QMessageBox.information(
-                    self, 'Exported', f'HTML saved to {fname}')
-            except Exception as e:
-                QMessageBox.critical(self, 'Export Failed',
-                                     f'Could not save HTML: {e}')
+        try:
+            with open(fname, 'w', encoding='utf-8') as f:
+                f.write(full_html)
+            QMessageBox.information(self, 'Exported', f'HTML saved to {fname}')
+        except Exception as e:
+            QMessageBox.critical(self, 'Export Failed',
+                                 f'Could not save HTML: {e}')
 
     def get_edited_assessment_data(self):
         """Retrieve all edited data"""

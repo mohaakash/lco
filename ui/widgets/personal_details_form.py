@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QPushButton, QScrollArea)
+                             QPushButton, QScrollArea, QFileDialog, QMessageBox)
 from PyQt6.QtCore import Qt, pyqtSignal
 from ui.widgets.custom_input import CustomInput
+from calc.element_calculator import process_kepler_pdf
 
 
 class PersonalDetailsForm(QWidget):
@@ -41,6 +42,25 @@ class PersonalDetailsForm(QWidget):
             }
         """)
         layout.addWidget(title_label)
+
+        # Upload Button
+        upload_btn = QPushButton("Upload Kepler Report (PDF)")
+        upload_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #E0F7FA;
+                color: #006064;
+                border: 1px dashed #0097A7;
+                border-radius: 5px;
+                padding: 10px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: #B2EBF2;
+            }
+        """)
+        upload_btn.clicked.connect(self._on_upload_clicked)
+        layout.addWidget(upload_btn)
 
         # Contact / Identity fields (added per request)
         identity_label = QLabel("Your Details")
@@ -205,16 +225,16 @@ class PersonalDetailsForm(QWidget):
 
         Shows a message and disables the Next button if invalid.
         """
-        def to_int_safe(s):
+        def to_float_safe(s):
             try:
-                return int(s)
+                return float(s)
             except Exception:
                 return None
 
-        elems = [to_int_safe(self.fire_element.text()), to_int_safe(self.earth_element.text()),
-                 to_int_safe(self.air_element.text()), to_int_safe(self.water_element.text())]
-        quals = [to_int_safe(self.cardinal_quality.text()), to_int_safe(self.fixed_quality.text()),
-                 to_int_safe(self.mutable_quality.text())]
+        elems = [to_float_safe(self.fire_element.text()), to_float_safe(self.earth_element.text()),
+                 to_float_safe(self.air_element.text()), to_float_safe(self.water_element.text())]
+        quals = [to_float_safe(self.cardinal_quality.text()), to_float_safe(self.fixed_quality.text()),
+                 to_float_safe(self.mutable_quality.text())]
 
         # If any is None (non-numeric), show error
         if any(v is None for v in elems + quals):
@@ -230,21 +250,25 @@ class PersonalDetailsForm(QWidget):
         elem_sum = sum(elems)
         qual_sum = sum(quals)
 
-        if elem_sum != 100 and qual_sum != 100:
+        # Allow small floating point error (e.g. 99.99 or 100.01)
+        def is_approx_100(val):
+            return 99.9 <= val <= 100.1
+
+        if not is_approx_100(elem_sum) and not is_approx_100(qual_sum):
             self._percent_error.setText(
                 "Element percentages must sum to 100.\nQualities must also sum to 100.")
             self._percent_error.setVisible(True)
             self.next_btn.setEnabled(False)
             return False
-        if elem_sum != 100:
+        if not is_approx_100(elem_sum):
             self._percent_error.setText(
-                f"Element percentages sum to {elem_sum} — they must total 100.")
+                f"Element percentages sum to {elem_sum:.2f} — they must total 100.")
             self._percent_error.setVisible(True)
             self.next_btn.setEnabled(False)
             return False
-        if qual_sum != 100:
+        if not is_approx_100(qual_sum):
             self._percent_error.setText(
-                f"Quality percentages sum to {qual_sum} — they must total 100.")
+                f"Quality percentages sum to {qual_sum:.2f} — they must total 100.")
             self._percent_error.setVisible(True)
             self.next_btn.setEnabled(False)
             return False
@@ -253,3 +277,32 @@ class PersonalDetailsForm(QWidget):
         self._percent_error.setVisible(False)
         self.next_btn.setEnabled(True)
         return True
+
+    def _on_upload_clicked(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Kepler Report PDF", "", "PDF Files (*.pdf)"
+        )
+        if not file_path:
+            return
+
+        try:
+            # Unpack the 5 returned values
+            # planets, elem_scores, elem_pcts, qual_scores, qual_pcts
+            _, _, elem_pcts, _, qual_pcts = process_kepler_pdf(file_path)
+
+            # Populate Elements
+            self.fire_element.setText(str(elem_pcts.get("Fire", 0)))
+            self.earth_element.setText(str(elem_pcts.get("Earth", 0)))
+            self.air_element.setText(str(elem_pcts.get("Air", 0)))
+            self.water_element.setText(str(elem_pcts.get("Water", 0)))
+
+            # Populate Qualities
+            self.cardinal_quality.setText(str(qual_pcts.get("Cardinal", 0)))
+            self.fixed_quality.setText(str(qual_pcts.get("Fixed", 0)))
+            self.mutable_quality.setText(str(qual_pcts.get("Mutable", 0)))
+
+            # Trigger validation
+            self._validate_percentages()
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to process PDF: {str(e)}")
