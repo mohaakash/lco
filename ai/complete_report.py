@@ -448,17 +448,18 @@ def _compute_percentages(values: dict) -> dict:
         # avoid division by zero; return zeros
         return {k: 0 for k in values.keys()}
 
-    raw = {k: int(v) for k, v in values.items()}
-    # compute proportional percentages, keep integer sum to 100
+    raw = {k: float(v) for k, v in values.items()}
+    # compute proportional percentages, keep sum to 100 (approx)
     perc = {}
-    cumulative = 0
+    cumulative = 0.0
     items = list(raw.items())
     for i, (k, v) in enumerate(items):
         if i == len(items) - 1:
-            # ensure sum is 100 by assigning remaining
-            perc[k] = 100 - cumulative
+            # ensure sum is 100 by assigning remaining, rounded to 1 decimal
+            remaining = 100.0 - cumulative
+            perc[k] = round(remaining, 1)
         else:
-            p = int(round((v / total) * 100))
+            p = round((v / total) * 100, 1)
             perc[k] = p
             cumulative += p
     return perc
@@ -482,10 +483,10 @@ def _element_status(value: int) -> str:
 # ============================================================
 
 def generate_daily_routine(user_input):
-    fire = int(user_input["fire"])
-    earth = int(user_input["earth"])
-    air = int(user_input["air"])
-    water = int(user_input["water"])
+    fire = float(user_input["fire"])
+    earth = float(user_input["earth"])
+    air = float(user_input["air"])
+    water = float(user_input["water"])
 
     element_prompt = build_final_prompt(fire, earth, air, water)
 
@@ -558,13 +559,12 @@ No text outside JSON.
 # ============================================================
 
 def build_descriptions_json(user_input):
-    fire = int(user_input["fire"])
-    earth = int(user_input["earth"])
-    air = int(user_input["air"])
-    water = int(user_input["water"])
-    # compute percentages for the four elements (sums to 100)
-    raw_vals = {"Fire": fire, "Earth": earth, "Air": air, "Water": water}
-    percentages = _compute_percentages(raw_vals)
+    fire = float(user_input["fire"])
+    earth = float(user_input["earth"])
+    air = float(user_input["air"])
+    water = float(user_input["water"])
+    # Use raw values directly to match input form exactly
+    percentages = {"Fire": fire, "Earth": earth, "Air": air, "Water": water}
 
     result = {}
 
@@ -686,14 +686,13 @@ def generate_complete_output(user_input) -> dict:
     modality_descriptions = build_modality_descriptions(user_input)
     # compute modality percentages
     try:
-        cardinal = int(user_input.get("cardinal", 0))
-        fixed = int(user_input.get("fixed", 0))
-        mutable = int(user_input.get("mutable", 0))
+        cardinal = float(user_input.get("cardinal", 0))
+        fixed = float(user_input.get("fixed", 0))
+        mutable = float(user_input.get("mutable", 0))
     except Exception:
-        cardinal = fixed = mutable = 0
+        cardinal = fixed = mutable = 0.0
 
-    modalities_raw = {"Cardinal": cardinal, "Fixed": fixed, "Mutable": mutable}
-    modalities_percent = _compute_percentages(modalities_raw)
+    modalities_percent = {"Cardinal": cardinal, "Fixed": fixed, "Mutable": mutable}
 
     # generate daily routine (may return parsed dict or structured fallback)
     daily_routine = generate_daily_routine(user_input)
@@ -720,16 +719,16 @@ def generate_complete_output(user_input) -> dict:
 # TEST RUN
 # ============================================================
 
-if __name__ == "__main__":
-    user_values = {
-        "fire": 23,
-        "earth": 23,
-        "air": 18,
-        "water": 36,
-        "cardinal": 32,
-        "fixed": 18,
-        "mutable": 20
-    }
+# if __name__ == "__main__":
+#     user_values = {
+#         "fire": 23,
+#         "earth": 23,
+#         "air": 18,
+#         "water": 36,
+#         "cardinal": 32,
+#         "fixed": 18,
+#         "mutable": 20
+#     }
 
-    output = generate_complete_output(user_values)
-    print(json.dumps(output, indent=2))
+#     output = generate_complete_output(user_values)
+#     print(json.dumps(output, indent=2))

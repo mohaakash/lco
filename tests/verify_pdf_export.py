@@ -19,7 +19,7 @@ def test_pdf_template_rendering():
             "time_of_birth": "12:00",
             "place_of_birth": "New York"
         },
-        "Element_Percentages": {"Fire": 10, "Water": 60, "Air": 15, "Earth": 15},
+        "Element_Percentages": {"Fire": 10.55, "Water": 60.45, "Air": 14.5, "Earth": 14.5},
         "Element_Descriptions": {
             "Fire": {
                 "Title": "The Transformer", 
@@ -28,7 +28,7 @@ def test_pdf_template_rendering():
                     "What Low Fire Feels Like—and How It Holds You Back": "Low Fire description here."
                 }, 
                 "Status": "Low", 
-                "Percentage": 10
+                "Percentage": 10.55
             },
             "Water": {
                 "water": {
@@ -142,6 +142,12 @@ def test_pdf_template_rendering():
              print("Verified: Dark blue color found.")
         else:
              print("Error: Dark blue color check failed.")
+
+        # Check for exact float percentages
+        if "10.55%" in output_html:
+             print("Verified: Exact float percentage (10.55%) found.")
+        else:
+             print("Error: Exact float percentage (10.55%) MISSING.")
 
         # Check for image inclusion
         if ctx['logo_png'] and ctx['logo_png'] in output_html:
