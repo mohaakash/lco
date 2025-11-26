@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QScrollArea, QFileDialog, QMessageBox)
 from PyQt6.QtCore import Qt, pyqtSignal
 from ui.widgets.custom_input import CustomInput
+from ui.widgets.settings_dialog import SettingsDialog
 from calc.element_calculator import process_kepler_pdf
 
 
@@ -32,6 +33,9 @@ class PersonalDetailsForm(QWidget):
         layout.setContentsMargins(40, 40, 40, 40)
         layout.setSpacing(25)
 
+        # Header Layout (Title + Settings)
+        header_layout = QHBoxLayout()
+        
         # Title
         title_label = QLabel("Elemental Balance Assessment")
         title_label.setStyleSheet("""
@@ -41,7 +45,27 @@ class PersonalDetailsForm(QWidget):
                 font-weight: 600;
             }
         """)
-        layout.addWidget(title_label)
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+
+        # Settings Button
+        settings_btn = QPushButton("Settings")
+        settings_btn.setFixedSize(80, 30)
+        settings_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+        """)
+        settings_btn.clicked.connect(self.open_settings)
+        header_layout.addWidget(settings_btn)
+
+        layout.addLayout(header_layout)
 
         # Upload Button
         upload_btn = QPushButton("Upload planetary Report (PDF)")
@@ -307,3 +331,7 @@ class PersonalDetailsForm(QWidget):
         except Exception as e:
             QMessageBox.warning(
                 self, "Error", f"Failed to process PDF: {str(e)}")
+
+    def open_settings(self):
+        dialog = SettingsDialog(self)
+        dialog.exec()

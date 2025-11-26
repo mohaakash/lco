@@ -525,18 +525,16 @@ def build_modality_descriptions(user_input):
 # ============================================================
 # MASTER FUNCTION
 # ============================================================
-def generate_complete_output(user_input) -> dict:
-    """Generate the complete report JSON for the provided user_input.
-    The returned dict includes at minimum:
-      - GeneratedAt (ISO UTC)
-      - Personal input echoed under 'Input' (if present)
-      - Element_Descriptions (Title, Content, Status, Percentage)
-      - Element_Percentages (mapping)
-      - Daily_Routine (parsed JSON from Gemini or a parse-fallback)
-      - Modality_Descriptions
-      - Modalities_Percentages
-    The function is defensive: LLM JSON parse errors will be returned as structured fallbacks.
+def generate_complete_output(user_input, api_key=None) -> dict:
     """
+    Orchestrates the entire report generation process.
+    1. Calculates elemental percentages (if not provided, though user_input usually has them).
+    2. Generates prompts for each element/modality.
+    3. Calls Gemini API to get descriptions.
+    4. Returns a structured dictionary with all content.
+    """
+    if api_key:
+        genai.configure(api_key=api_key)
     # prepare descriptions and percentages
     element_descriptions = build_descriptions_json(user_input)
     modality_descriptions = build_modality_descriptions(user_input)

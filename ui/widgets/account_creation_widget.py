@@ -16,13 +16,14 @@ class ReportWorker(QThread):
     """Background worker that runs the slow generate_complete_output call."""
     result_ready = pyqtSignal(dict)
 
-    def __init__(self, user_input):
+    def __init__(self, user_input, api_key=None):
         super().__init__()
         self.user_input = user_input
+        self.api_key = api_key
 
     def run(self):
         try:
-            result = generate_complete_output(self.user_input)
+            result = generate_complete_output(self.user_input, self.api_key)
             print(result)
         except Exception as e:
             result = {"__error": True, "error_message": str(e)}
@@ -389,8 +390,13 @@ class AccountCreationWidget(QWidget):
         except Exception:
             pass
 
+        # Get API Key from settings
+        from PyQt6.QtCore import QSettings
+        settings = QSettings("BirthCode", "Settings")
+        api_key = settings.value("gemini_api_key", "")
+
         # start background worker
-        self._worker = ReportWorker(user_input)
+        self._worker = ReportWorker(user_input, api_key)
         self._worker.result_ready.connect(lambda result: self._on_generation_finished(
             result, personal, fire, earth, air, water, cardinal, fixed, mutable))
         self._worker.finished.connect(lambda: None)
