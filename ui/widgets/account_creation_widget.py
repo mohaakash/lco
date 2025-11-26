@@ -23,6 +23,7 @@ class ReportWorker(QThread):
     def run(self):
         try:
             result = generate_complete_output(self.user_input)
+            print(result)
         except Exception as e:
             result = {"__error": True, "error_message": str(e)}
         # emit result (in main thread)

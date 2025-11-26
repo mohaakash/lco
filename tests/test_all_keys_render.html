@@ -184,9 +184,7 @@
 
     <!-- Header (Logo) -->
     <div class="header">
-        {% if logo_png %}
-        <img src="data:image/png;base64,{{ logo_png }}" class="logo" alt="Logo" />
-        {% endif %}
+        
     </div>
 
     <!-- Footer (Disclaimer) -->
@@ -199,12 +197,10 @@
 
     <!-- COVER PAGE -->
     <div class="cover">
-        {% if cover_image_png %}
-        <img src="data:image/png;base64,{{ cover_image_png }}" class="cover-image" alt="Cover Image" />
-        {% endif %}
+        
 
-        <div class="client-name">{{ Personal.name if Personal is defined else (name or 'Client Name') }}</div>
-        <div class="report-date">{{ report_date or "" }}</div>
+        <div class="client-name">Client Name</div>
+        <div class="report-date"></div>
     </div>
 
     <div class="page-break"></div>
@@ -246,9 +242,7 @@
             an umbrella, understanding one's astrological health indicators facilitates proactive healthcare strategies
             aimed at prevention.</p>
 
-        {% if human_png %}
-        <img src="data:image/png;base64,{{ human_png }}" class="human-img" alt="Human Energy Field" />
-        {% endif %}
+        
     </div>
 
     <div class="page-break"></div>
@@ -322,150 +316,342 @@
     <div>
         <h1>Your Elemental Blueprint</h1>
 
-        {% set ep = Element_Percentages if (Element_Percentages is defined) else {} %}
+        
         <div class="elemental-blueprint">
             <span class="label">Your element combination = </span>
-            <span class="label">Fire</span> <span class="value">{{ ep.get('Fire', 0) }}%</span> –
-            <span class="label">Earth</span> <span class="value">{{ ep.get('Earth', 0) }}%</span> –
-            <span class="label">Air</span> <span class="value">{{ ep.get('Air', 0) }}%</span> –
-            <span class="label">Water</span> <span class="value">{{ ep.get('Water', 0) }}%</span>
+            <span class="label">Fire</span> <span class="value">25%</span> –
+            <span class="label">Earth</span> <span class="value">25%</span> –
+            <span class="label">Air</span> <span class="value">25%</span> –
+            <span class="label">Water</span> <span class="value">25%</span>
         </div>
 
-        {# Prefer generator keys Element_Descriptions, fall back to mapped Elemental_Analysis #}
-        {% set ea = Element_Descriptions if (Element_Descriptions is defined) else (Elemental_Analysis if
-        (Elemental_Analysis is defined) else {}) %}
+        
+        
 
-        {% for el_name in ['Fire', 'Air', 'Water', 'Earth'] %}
-        {% set el_data = ea.get(el_name, {}) %}
+        
+        
 
-        <h2>The {{ el_name }} Element</h2>
+        <h2>The Fire Element</h2>
 
-        {# Extract content #}
-        {# Logic to handle nested structure from fixed JSONs (e.g. {'air': {'low': {...}}}) #}
-        {% set status = el_data.get('Status', 'Balanced') %}
-        {% set nested_content = el_data.get(el_name.lower()) %}
-        {% set content_raw = '' %}
+        
+        
+        
+        
+        
 
-        {% if nested_content and (nested_content is mapping) %}
-        {# Try to get content for the specific status (low/high) #}
-        {% set content_raw = nested_content.get(status.lower()) or nested_content.get('balanced') or nested_content %}
-        {% else %}
-        {# Fallback to Content key or the object itself #}
-        {% set content_raw = el_data.get('Content', el_data) if (el_data is mapping) else el_data %}
-        {% endif %}
+        
+        
+        
+        
 
-        {% set description = '' %}
-        {% set scientific = '' %}
-        {% set imbalance = '' %}
-        {% set remedies = {} %}
+        
+        
+        
+        
 
-        {% if content_raw is mapping %}
-        {% set description = content_raw.get('The Fire Element') or content_raw.get('The Earth Element') or
-        content_raw.get('The Air Element') or content_raw.get('The Water Element') or content_raw.get('Description') or
-        '' %}
-        {% set scientific = content_raw.get('Scientific Correlation') or '' %}
+        
+        
+        
 
-        {% set imb_list = [] %}
-        {# Fire/Earth keys #}
-        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back') %}{% set _ =
-        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back')) %}{% endif %}
-        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You') %}{% set _ =
-        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You')) %}{% endif %}
-        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In') %}{% set _ =
-        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In')) %}{%
-        endif %}
-        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up') %}{% set _ =
-        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up')) %}{%
-        endif %}
+        
+        
+        
+        
+        
+        
 
-        {# Air/Water keys #}
-        {% if content_raw.get('Low ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Low ' + el_name)) %}{%
-        endif %}
-        {% if content_raw.get('Excess ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Excess ' + el_name))
-        %}{% endif %}
+        
+        
+        
 
-        {% if content_raw.get('Imbalance Effects') %}{% set _ = imb_list.append(content_raw.get('Imbalance Effects'))
-        %}{% endif %}
-        {% set imbalance = imb_list|join('<br><br>') %}
+        
+        
 
-        {% set diet = content_raw.get('Diet') or '' %}
-        {% set lifestyle = content_raw.get('Lifestyle and Exercise') or content_raw.get('Lifestyle and Exercise
-        Recommendations') or '' %}
-        {% set herbal = content_raw.get('Gems, Flower Remedies, and Aromas') or content_raw.get('Herbs') or
-        content_raw.get('Crystals, Gems, and Herbal Remedies') or '' %}
-        {% set remedies = {'Diet': diet, 'Lifestyle_and_Exercise': lifestyle, 'Herbal_or_Energy_Support': herbal} %}
-        {% else %}
-        {% set description = content_raw %}
-        {% set scientific = el_data.get('Scientific_Correlation') %}
-        {% set imbalance = el_data.get('Imbalance_Effects') %}
-        {% set remedies = el_data.get('Remedies') or {} %}
-        {% endif %}
+        
+        
+        
+        
+        
 
-        {% if description %}
-        <p>{{ description | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
+        
+        <p>Fire element description...</p>
+        
 
-        {% if scientific %}
-        <h3>Scientific Correlation</h3>
-        <p>{{ scientific | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
+        
 
-        {% if imbalance %}
+        
         <h3>Imbalance Effects</h3>
-        <p>{{ imbalance | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
+        <p>If you've got excess Fire...</p>
+        
 
-        {% if remedies and (remedies.Diet or remedies.Lifestyle_and_Exercise or remedies.Herbal_or_Energy_Support) %}
+        
         <h3>Remedies</h3>
         <table>
-            {% if remedies.Diet %}
+            
             <tr>
                 <td width="30%"><strong>Diet</strong></td>
-                <td>{{ remedies.Diet | replace('\n', '<br>') | safe }}</td>
+                <td>Go for cooling, hydrating foods...</td>
             </tr>
-            {% endif %}
-            {% if remedies.Lifestyle_and_Exercise %}
+            
+            
             <tr>
                 <td><strong>Lifestyle & Exercise</strong></td>
-                <td>{{ remedies.Lifestyle_and_Exercise | replace('\n', '<br>') | safe }}</td>
+                <td>Cool off with swimming...</td>
             </tr>
-            {% endif %}
-            {% if remedies.Herbal_or_Energy_Support %}
+            
+            
             <tr>
                 <td><strong>Herbal / Energy Support</strong></td>
-                <td>{{ remedies.Herbal_or_Energy_Support | replace('\n', '<br>') | safe }}</td>
+                <td>Herbs like hops, violet, aloe...</td>
             </tr>
-            {% endif %}
+            
         </table>
-        {% endif %}
+        
 
-        {# Render all other keys from content_raw that haven't been handled yet #}
-        {% if content_raw is mapping %}
-        {% set rendered_keys = [
-        'The Fire Element', 'The Earth Element', 'The Air Element', 'The Water Element',
-        'Description', 'Scientific Correlation',
-        'What Low ' + el_name + ' Feels Like—and How It Holds You Back',
-        'What Low ' + el_name + ' Feels Like—and How It Scatters You',
-        'What Low ' + el_name + ' Feels Like—and How It Dries You Out',
-        'What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In',
-        'What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up',
-        'What Excess ' + el_name + ' Feels Like—and Why You Need to Ground It',
-        'What Excess ' + el_name + ' Feels Like—and Why You Need to Dry Out',
-        'Low ' + el_name, 'Excess ' + el_name,
-        'Imbalance Effects',
-        'Diet', 'Lifestyle and Exercise', 'Lifestyle and Exercise Recommendations',
-        'Gems, Flower Remedies, and Aromas', 'Herbs', 'Crystals, Gems, and Herbal Remedies',
-        'Flower remedies'
-        ] %}
+        
+        
+        
 
-        {% for key, value in content_raw.items() %}
-        {% if key not in rendered_keys and value %}
-        <h3>{{ key.replace('_', ' ') }}</h3>
-        <p>{{ value | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
-        {% endfor %}
-        {% endif %}
-        {% endfor %}
+        
+        
+        
+        
+        <h3>Physique</h3>
+        <p>Lean or stream-lined with powerful muscles...</p>
+        
+        
+        
+        <h3>Temperament</h3>
+        <p>Choleric, bilious-nervous...</p>
+        
+        
+        
+        <h3>Assessing Your Fire Balance</h3>
+        <p>To check how your Fire is doing...</p>
+        
+        
+        
+        <h3>Urine</h3>
+        <p>Light-colored urine may indicate...</p>
+        
+        
+        
+        <h3>Skin</h3>
+        <p>A rosy or red complexion...</p>
+        
+        
+        
+        <h3>Eyes</h3>
+        <p>Bright, clear eyes show balanced Fire...</p>
+        
+        
+        
+        <h3>Digestion</h3>
+        <p>With high Fire, you get super hungry...</p>
+        
+        
+        
+        <h3>Emotions</h3>
+        <p>Balanced Fire brings cheerfulness...</p>
+        
+        
+        
+        <h3>Immunity</h3>
+        <p>Fire gives you that fighter's edge...</p>
+        
+        
+        
+        
+        
+        <h3>Ways to Balance Excess Fire</h3>
+        <p>Cooling, hydrating, and grounding...</p>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <h2>The Air Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+
+        <h2>The Water Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+
+        <h2>The Earth Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+        
+        
+
+        
+        
+        
     </div>
 
     <div class="page-break"></div>
@@ -473,27 +659,17 @@
     <!-- Your Daily Plan to Restore Balance -->
     <div>
         <h1>Your Daily Plan to Restore Balance</h1>
-        {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is defined)
-        else {}) %}
+        
 
-        {% for period in ['Morning', 'Midday', 'Evening', 'Weekly_Addition'] %}
-        {% if dg.get(period) %}
-        <h2>{{ period|replace('_', ' ') }}</h2>
-        {% set content = dg.get(period) %}
-        {% if content is mapping %}
-        <table>
-            {% for ck, cv in content.items() %}
-            <tr>
-                <td width="30%"><strong>{{ ck.replace('_',' ') }}</strong></td>
-                <td>{{ cv | replace('\n', '<br>') | safe }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        <p>{{ content | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+        
+        
+        
+        
+        
+        
+        
+        
+        
     </div>
 
     <div class="page-break"></div>
@@ -508,41 +684,16 @@
             Fixed, and Mutable.</p>
         <p>The quality of elements in your chart is</p>
 
-        {% set mp = Modalities_Percentages if (Modalities_Percentages is defined) else {} %}
+        
         <div class="elemental-blueprint">
-            <span class="label">Cardinal</span> <span class="value">{{ mp.get('Cardinal', 0) }}%</span> –
-            <span class="label">Fixed</span> <span class="value">{{ mp.get('Fixed', 0) }}%</span> –
-            <span class="label">Mutable</span> <span class="value">{{ mp.get('Mutable', 0) }}%</span>
+            <span class="label">Cardinal</span> <span class="value">0%</span> –
+            <span class="label">Fixed</span> <span class="value">0%</span> –
+            <span class="label">Mutable</span> <span class="value">0%</span>
         </div>
 
-        {% set mods = Modality_Descriptions if (Modality_Descriptions is defined) else (Modalities if (Modalities is
-        defined) else {}) %}
+        
 
-        {% for mname, mcontent in mods.items() %}
-        {# mcontent is typically {"Cardinal_Energy": {...}} #}
-        {% set inner_dict = mcontent.get(mname + '_Energy') or mcontent %}
-
-        {# Try to find the title key which is usually "Cardinal Energy", "Fixed Energy" etc #}
-        {% set title_key = mname + ' Energy' %}
-        {% set title_text = inner_dict.get(title_key) %}
-
-        {% if title_text %}
-        <div class="modality-title">{{ title_key }}</div>
-        <p>{{ title_text | replace('\n', '<br>') | safe }}</p>
-        {% else %}
-        <div class="modality-title">{{ mname }} Energy</div>
-        {% endif %}
-
-        {% if inner_dict is mapping %}
-        {% for k,v in inner_dict.items() %}
-        {% if k != title_key %}
-        <p><strong>{{ k.replace('_',' ') }}:</strong> {{ v | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
-        {% endfor %}
-        {% else %}
-        <p>{{ inner_dict | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
-        {% endfor %}
+        
     </div>
 
     <div style="margin-top: 50px; text-align: center; font-weight: bold; font-size: 14px;">
