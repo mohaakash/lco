@@ -6,7 +6,7 @@ from ui.widgets.account_creation_widget import AccountCreationWidget
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("ASTRO HEALTH - AI")
+        self.setWindowTitle("BirthCode")
         self.setMinimumSize(1000, 750)
 
         # Set background color

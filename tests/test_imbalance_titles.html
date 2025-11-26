@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 20mm 20mm 20mm;
+
+            @top-right {
+                content: element(header);
+            }
+
+            @bottom-center {
+                content: element(footer);
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            text-align: justify;
+        }
+
+        /* Header & Footer */
+        div.header {
+            position: running(header);
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        div.footer {
+            position: running(footer);
+            text-align: center;
+            font-size: 9px;
+            color: #000;
+            width: 100%;
+        }
+
+        .logo {
+            width: 120px;
+            /* Adjusted size */
+        }
+
+        /* Cover Page */
+        .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+            /* Adjust for header/footer */
+            text-align: center;
+        }
+
+        .cover-image {
+            width: 550px;
+            margin: 0 auto 20px auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .client-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .report-date {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 15px;
+            color: darkblue;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: left;
+            border: none;
+            /* Remove previous border */
+        }
+
+        h2 {
+            font-size: 12px;
+            color: rgb(233, 151, 0);
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        h3 {
+            font-size: 12px;
+            color: #000;
+            /* Normal text color but bold */
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        /* Special case for Modality Titles (Fixed/Mutable/Cardinal Energy) */
+        .modality-title {
+            font-size: 12px;
+            color: darkblue;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        .blue-center {
+            color: darkblue;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .elemental-blueprint {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .elemental-blueprint span.label {
+            color: darkblue;
+        }
+
+        .elemental-blueprint span.value {
+            color: red;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .human-img {
+            display: block;
+            margin: 20px auto;
+            max-width: 300px;
+        }
+
+        .subtle {
+            color: #000;
+            /* Reset subtle color to black for this design */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header (Logo) -->
+    <div class="header">
+        
+    </div>
+
+    <!-- Footer (Disclaimer) -->
+    <div class="footer">
+        DISCLAIMER: The content of this document, such as text, graphics, images, and other material contained are for
+        informational purposes only. This document is not intended to be a substitute for professional medical advice,
+        diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any
+        questions you may have regarding a health condition.
+    </div>
+
+    <!-- COVER PAGE -->
+    <div class="cover">
+        
+
+        <div class="client-name">Client Name</div>
+        <div class="report-date"></div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- How Planetary Fields Entangle... -->
+    <div>
+        <h1>How Planetary Fields Entangle with Your Body's Energy Blueprint</h1>
+
+        <p>Holistic well-being begins with a preventive approach to health, urging us not to wait until disease
+            manifests. Your food choices play a pivotal role in shaping your body’s health, but it’s not just what you
+            eat; your thoughts and emotional state significantly influence your well-being.</p>
+
+        <p>Your body is interconnected to the environment surrounding you, from the obvious impacts of diet and
+            lifestyle to even the more subtle influences like planetary gravitational pulls. We are most familiar with
+            how the lunar cycle affects human behavior and physiology. The other planets in the solar system exert their
+            influence in more subtle ways, affecting our energetic body.</p>
+
+        <p>Our etheric body, our subtle energy counterpart of the physical body, possesses a series of force centers
+            (nerves plexus) or chakras that receive the energy of the planets. According to Eastern teachings, the
+            energy we receive from the Trinity passes from these subtle centers into our physical body by means of
+            invisible circuits called nadis (Savitri, Hindu text) or meridians (TCM).</p>
+
+        <p>All ailments are caused because our magnetic field doesn’t pull enough energy from the air we breathe into
+            the lungs to supply the different parts of the body, so when weaker areas are not supplied with their
+            energy, abnormal function results.</p>
+
+        <p>Your astral chart reflects your own energy pattern to offer insights into your state of health, pinpoint
+            nutritional deficiencies, and gauge your psychological balance.</p>
+
+        <p>The condition and placement of planets in your chart can indicate potential health issues based on their
+            dignity and avasthas, as well as the zodiac sign, they occupy. However, it's important to note that not all
+            symptoms or diseases are certain to manifest, and their occurrence may vary throughout different stages of
+            life corresponding to planetary periods (dasas/profections) and transits.</p>
+
+        <p>When multiple planets highlight a particular ailment, the likelihood of its manifestation increases.</p>
+
+        <p>Nonetheless, health astrology operates akin to a personalized weather forecast, offering insights for
+            preventive measures rather than definitive predictions. Just as one prepares for possible rain by carrying
+            an umbrella, understanding one's astrological health indicators facilitates proactive healthcare strategies
+            aimed at prevention.</p>
+
+        
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- The Elements -->
+    <div>
+        <h1>The Elements</h1>
+
+        <p>The four elements Fire Earth Water and Air can help you to pinpoint some obvious and easy ways to correct
+            factors that affect health. Too much or not enough of an element can contribute to weakness in various parts
+            of the body. By compensating for a lack of or an emphasis on an element one can alter the imbalance and
+            improve health.</p>
+
+        <p>Fire Earth Water and Air elements are the building-blocks of our physical as well as of our psychological
+            functioning and we find them also in natural substances like herbs, and nutrition. This is the reason why
+            understanding your health energetic blueprint makes healing possible.</p>
+
+        <p>The Four Humors (Hippocrates, Galen) are the metabolic agents of the Four Elements in the human body. The
+            right balance and purity of them is essential to maintaining health.</p>
+
+        <div class="blue-center">An excess of a humor may lead to a great diversity of symptoms and diseases with the
+            problem manifesting through the weakest point of the individual client.</div>
+
+        <p>Every humor or element is a combination of two qualities: TEMPERATURE & MOISTURE. These concepts apply both
+            physically and psychologically.</p>
+
+        <table>
+            <tr>
+                <td><strong>FIRE</strong></td>
+                <td><strong>HOT AND DRY</strong></td>
+                <td>Heat: energy life impulse motive movement energy is spent and body cools down</td>
+            </tr>
+            <tr>
+                <td><strong>AIR</strong></td>
+                <td><strong>HOT AND MOIST</strong></td>
+                <td>Coolness; malfunction, not enough energy for metabolic processes</td>
+            </tr>
+            <tr>
+                <td><strong>EARTH</strong></td>
+                <td><strong>COLD AND DRY</strong></td>
+                <td>Dryness: maintains form and creates boundaries</td>
+            </tr>
+            <tr>
+                <td><strong>WATER</strong></td>
+                <td><strong>COLD AND MOIST</strong></td>
+                <td>Moisture: cool conditions attract moisture, connects and softens</td>
+            </tr>
+        </table>
+
+        <p>Because heat and cold are the primary characteristics, the placement on the scale of hot/cold is most
+            important.</p>
+
+        <p>An organism that is cold has to be heated and one that is too hot has to be cooled down. In practice we will
+            use mainly foods of a humoral nature, contrary to the excess humor (the principle of antipathy). Also some
+            foods can be eaten which have the temperature as the healing element but not the same degree of moisture/
+            dryness.</p>
+
+        <p>If the problem is excess water it is best to avoid all cold and moist foods and eat as much as you can from
+            those foods listed under hot and dry. But some foods under hot and moist can be eaten too. These foods will
+            heat the body up, and more heat always means less moisture. The secondary axis the moisture/dryness rate
+            depends on the heat/cold axis to a certain extent.</p>
+
+        <p>Lastly, herbs should work against the humoral excess that causes the disease; this is the most important
+            thing. The exact herb that you need will be determined by the planetary positions in your chart. Also, they
+            have to be taken at the right planetary hour for better results.</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Your Elemental Blueprint -->
+    <div>
+        <h1>Your Elemental Blueprint</h1>
+
+        
+        <div class="elemental-blueprint">
+            <span class="label">Your element combination = </span>
+            <span class="label">Fire</span> <span class="value">40%</span> –
+            <span class="label">Earth</span> <span class="value">20%</span> –
+            <span class="label">Air</span> <span class="value">20%</span> –
+            <span class="label">Water</span> <span class="value">20%</span>
+        </div>
+
+        
+        
+
+        
+        
+
+        <h2>The Fire Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+
+        
+        <p>Fire description.</p>
+        
+
+        
+
+        
+        <h3>What Excess Fire Feels Like—and Why You Need to Rein It In</h3>
+        <p>Excess Fire content.</p>
+        
+
+        
+
+        
+        <table>
+            
+            <tr>
+                <td width="30%"><strong>Diet</strong></td>
+                <td>Fire Diet</td>
+            </tr>
+            
+            
+            
+        </table>
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <h2>The Air Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+
+        
+        <p>Air description.</p>
+        
+
+        
+
+        
+        <h3>Low Air</h3>
+        <p>Low Air content.</p>
+        
+
+        
+
+        
+        <table>
+            
+            <tr>
+                <td width="30%"><strong>Diet</strong></td>
+                <td>Air Diet</td>
+            </tr>
+            
+            
+            
+        </table>
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <h2>The Water Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+
+        
+        <p>Water description.</p>
+        
+
+        
+
+        
+        <h3>What Excess Water Feels Like—and Why You Need to Dry Out</h3>
+        <p>Excess Water content.</p>
+        
+
+        
+
+        
+        <table>
+            
+            <tr>
+                <td width="30%"><strong>Diet</strong></td>
+                <td>Water Diet</td>
+            </tr>
+            
+            
+            
+        </table>
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <h2>The Earth Element</h2>
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        
+
+        
+        <p>Earth description.</p>
+        
+
+        
+
+        
+        <h3>What Low Earth Feels Like—and How It Scatters You</h3>
+        <p>Low Earth content.</p>
+        
+
+        
+
+        
+        <table>
+            
+            <tr>
+                <td width="30%"><strong>Diet</strong></td>
+                <td>Earth Diet</td>
+            </tr>
+            
+            
+            
+        </table>
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Your Daily Plan to Restore Balance -->
+    <div>
+        <h1>Your Daily Plan to Restore Balance</h1>
+        
+
+        
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- The Qualities of your Elements -->
+    <div>
+        <h1>The Qualities of your Elements</h1>
+
+        <p>The distribution on planets in the zodiacal wheel shows how we respond to stimuli, and especially how we act
+            under tension. The presence of planets in a particular sign indicates how that sign expresses their element,
+            meaning the mode of behavior they use to express the element needs. There are three qualities: Cardinal,
+            Fixed, and Mutable.</p>
+        <p>The quality of elements in your chart is</p>
+
+        
+        <div class="elemental-blueprint">
+            <span class="label">Cardinal</span> <span class="value">0%</span> –
+            <span class="label">Fixed</span> <span class="value">0%</span> –
+            <span class="label">Mutable</span> <span class="value">0%</span>
+        </div>
+
+        
+
+        
+    </div>
+
+    <div style="margin-top: 50px; text-align: center; font-weight: bold; font-size: 14px;">
+        END OF THE ELEMENTS REPORT
+    </div>
+
+</body>
+
+</html>

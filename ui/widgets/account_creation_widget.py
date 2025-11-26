@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QLineEdit, QPushButton, QComboBox, QFrame, QStackedWidget)
 from PyQt6.QtCore import Qt, pyqtSignal, QThread
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QFontDatabase
 from ui.widgets.step_indicator import StepIndicator
 from ui.widgets.custom_input import CustomInput, PhoneInput, HelpIcon
 from ui.widgets.personal_details_form import PersonalDetailsForm
@@ -39,6 +39,19 @@ class AccountCreationWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        # Register local fonts (Aptos) so Qt widgets and stylesheets can use them
+        try:
+            from pathlib import Path
+            fonts_dir = Path(__file__).resolve().parents[2] / 'fonts'
+            if fonts_dir.exists():
+                for f in fonts_dir.glob('*.ttf'):
+                    try:
+                        QFontDatabase.addApplicationFont(str(f))
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
         self.setFixedSize(1100, 700)
         self.setStyleSheet("""
             QWidget {
@@ -106,7 +119,7 @@ class AccountCreationWidget(QWidget):
         layout.setSpacing(0)
 
         # DNB Logo
-        logo = QLabel("ASTRO HEALTH")
+        logo = QLabel("BirthCode")
         logo.setStyleSheet("""
             QLabel {
                 color: #008B8B;
@@ -120,11 +133,11 @@ class AccountCreationWidget(QWidget):
         layout.addSpacing(20)
 
         # Create account title
-        title = QLabel("Elemental Balance Assessment")
+        title = QLabel("Unveil Your Energetic Blueprint")
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
-                font-size: 22px;
+                font-size: 14px;
                 font-weight: 600;
                 background-color: transparent;
             }
@@ -217,54 +230,60 @@ class AccountCreationWidget(QWidget):
             # }
             elemental_src = full_report.get("Element_Descriptions", {}) or {}
             elemental_map = {}
-            
+
             for ename, ed in elemental_src.items():
                 # ed is expected to be a dict with Title, Content, Status, Percentage
                 if not isinstance(ed, dict):
                     continue
-                
+
                 content_data = ed.get("Content")
                 # Content might be a JSON string, a dict, or a plain string
                 description = ""
                 scientific = ""
                 imbalance = ""
                 remedies = {}
-                
+
                 if isinstance(content_data, dict):
                     # It's already a parsed dict (e.g. from fire_high_fixed JSON)
                     # We need to map keys from the JSON prompts to UI fields
                     # Example keys in JSON: "The Fire Element", "Physique", "Temperament", "Diet", "Lifestyle and Exercise"
-                    
+
                     # Heuristic mapping
                     description = content_data.get("The Fire Element") or content_data.get("The Earth Element") or \
-                                  content_data.get("The Air Element") or content_data.get("The Water Element") or \
-                                  content_data.get("Description") or ""
-                                  
-                    scientific = content_data.get("Scientific Correlation") or "" # Not present in all, but good to have
-                    
+                        content_data.get("The Air Element") or content_data.get("The Water Element") or \
+                        content_data.get("Description") or ""
+
+                    # Not present in all, but good to have
+                    scientific = content_data.get(
+                        "Scientific Correlation") or ""
+
                     # Combine some fields for "Imbalance Effects" if not explicitly present
                     imbalance_parts = []
                     if content_data.get("What Low Fire Feels Like—and How It Holds You Back"):
-                        imbalance_parts.append(content_data.get("What Low Fire Feels Like—and How It Holds You Back"))
+                        imbalance_parts.append(content_data.get(
+                            "What Low Fire Feels Like—and How It Holds You Back"))
                     if content_data.get("What Excess Fire Feels Like—and Why You Need to Rein It In"):
-                        imbalance_parts.append(content_data.get("What Excess Fire Feels Like—and Why You Need to Rein It In"))
+                        imbalance_parts.append(content_data.get(
+                            "What Excess Fire Feels Like—and Why You Need to Rein It In"))
                     # ... add other element specific keys if needed, or generic "Imbalance"
                     if content_data.get("Imbalance Effects"):
-                        imbalance_parts.append(content_data.get("Imbalance Effects"))
-                        
+                        imbalance_parts.append(
+                            content_data.get("Imbalance Effects"))
+
                     imbalance = "\n\n".join(imbalance_parts)
-                    
+
                     # Remedies
                     remedies = {
                         "Diet": content_data.get("Diet", ""),
                         "Lifestyle_and_Exercise": content_data.get("Lifestyle and Exercise", ""),
-                        "Herbal_or_Energy_Support": content_data.get("Gems, Flower Remedies, and Aromas") or \
-                                                    content_data.get("Herbs") or \
-                                                    content_data.get("Crystals, Gems, and Herbal Remedies") or ""
+                        "Herbal_or_Energy_Support": content_data.get("Gems, Flower Remedies, and Aromas") or
+                        content_data.get("Herbs") or
+                        content_data.get(
+                            "Crystals, Gems, and Herbal Remedies") or ""
                     }
                 elif isinstance(content_data, str):
                     description = content_data
-                
+
                 elemental_map[ename] = {
                     "Classification": ed.get("Title", ""),
                     "Description": description,
@@ -276,15 +295,15 @@ class AccountCreationWidget(QWidget):
                 }
 
             daily_src = full_report.get("Daily_Routine", {}) or {}
-            
+
             # Modalities
             modalities_src = full_report.get("Modality_Descriptions", {}) or {}
             modalities_map = {}
-            
+
             for mname, mcontent in modalities_src.items():
                 # mcontent is expected to be a dict (parsed JSON) or string
                 # Structure: "Cardinal": { "Cardinal_Energy": { "Cardinal Energy": "...", ... } } OR just the inner dict
-                
+
                 content_dict = {}
                 if isinstance(mcontent, dict):
                     # Check if it's nested like {"Cardinal_Energy": {...}}
@@ -292,9 +311,9 @@ class AccountCreationWidget(QWidget):
                         content_dict = list(mcontent.values())[0]
                     else:
                         content_dict = mcontent
-                
+
                 modalities_map[mname] = {
-                    "Content": content_dict, # Pass the whole dict for rendering
+                    "Content": content_dict,  # Pass the whole dict for rendering
                     "Percentage": full_report.get("Modalities_Percentages", {}).get(mname, 0)
                 }
 
@@ -308,11 +327,13 @@ class AccountCreationWidget(QWidget):
                 "Summary": full_report.get("Summary", "AI generated assessment"),
                 "Disclaimer": full_report.get("Disclaimer", "")
             }
-            
+
             # Keep raw data too just in case
-            combined["Element_Descriptions"] = full_report.get("Element_Descriptions", {})
+            combined["Element_Descriptions"] = full_report.get(
+                "Element_Descriptions", {})
             combined["Daily_Routine"] = full_report.get("Daily_Routine", {})
-            combined["Modality_Descriptions"] = full_report.get("Modality_Descriptions", {})
+            combined["Modality_Descriptions"] = full_report.get(
+                "Modality_Descriptions", {})
 
             self.elemental_assessment_form.load_assessment_data(combined)
             self.show_assessment_result()

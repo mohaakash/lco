@@ -44,7 +44,7 @@ class PersonalDetailsForm(QWidget):
         layout.addWidget(title_label)
 
         # Upload Button
-        upload_btn = QPushButton("Upload Kepler Report (PDF)")
+        upload_btn = QPushButton("Upload planetary Report (PDF)")
         upload_btn.setStyleSheet("""
             QPushButton {
                 background-color: #E0F7FA;
@@ -100,7 +100,7 @@ class PersonalDetailsForm(QWidget):
         layout.addLayout(contact_layout)
 
         # Element Percentages Section
-        element_pct_label = QLabel("Element Percentages")
+        element_pct_label = QLabel("Your Element Blueprint")
         element_pct_label.setStyleSheet("""
             QLabel {
                 color: #0099CC;
@@ -133,10 +133,10 @@ class PersonalDetailsForm(QWidget):
         layout.addLayout(air_water_layout)
 
         # Note
-        note_label = QLabel(
-            "Note: Any element with 0% will not be included in the analysis.")
-        note_label.setStyleSheet("color: #999999; font-size: 11px;")
-        layout.addWidget(note_label)
+        # note_label = QLabel(
+        #     "Note: Any element with 0% will not be included in the analysis.")
+        # note_label.setStyleSheet("color: #999999; font-size: 11px;")
+        # layout.addWidget(note_label)
 
         # Validation message (hidden until needed)
         self._percent_error = QLabel("")
@@ -280,7 +280,7 @@ class PersonalDetailsForm(QWidget):
 
     def _on_upload_clicked(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Kepler Report PDF", "", "PDF Files (*.pdf)"
+            self, "Select Planetary Report PDF", "", "PDF Files (*.pdf)"
         )
         if not file_path:
             return
@@ -305,4 +305,5 @@ class PersonalDetailsForm(QWidget):
             self._validate_percentages()
 
         except Exception as e:
-            QMessageBox.warning(self, "Error", f"Failed to process PDF: {str(e)}")
+            QMessageBox.warning(
+                self, "Error", f"Failed to process PDF: {str(e)}")

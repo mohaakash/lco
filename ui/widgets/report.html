@@ -4,6 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        /* Load Aptos fonts from project fonts/ folder */
+        @font-face {
+            font-family: 'Aptos';
+            src: url('../../fonts/Aptos.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Aptos';
+            src: url('../../fonts/Aptos-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-style: bold;
+        }
+
+        @font-face {
+            font-family: 'Aptos';
+            src: url('../../fonts/Aptos-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+        }
+
         @page {
             size: A4;
             margin: 20mm 20mm 20mm 20mm;
@@ -18,12 +40,12 @@
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Aptos', serif;
             color: #000;
             line-height: 1.5;
             margin: 0;
             padding: 0;
-            font-size: 12px;
+            font-size: 11pt;
             text-align: justify;
         }
 
@@ -78,7 +100,7 @@
 
         /* Typography */
         h1 {
-            font-size: 15px;
+            font-size: 18pt;
             color: darkblue;
             font-weight: bold;
             margin-top: 20px;
@@ -89,7 +111,7 @@
         }
 
         h2 {
-            font-size: 12px;
+            font-size: 16pt;
             color: rgb(233, 151, 0);
             font-weight: bold;
             margin-top: 15px;
@@ -98,7 +120,7 @@
         }
 
         h3 {
-            font-size: 12px;
+            font-size: 12pt;
             color: #000;
             /* Normal text color but bold */
             font-weight: bold;
@@ -109,7 +131,7 @@
 
         /* Special case for Modality Titles (Fixed/Mutable/Cardinal Energy) */
         .modality-title {
-            font-size: 12px;
+            font-size: 14pt;
             color: darkblue;
             font-weight: bold;
             margin-top: 10px;
@@ -142,12 +164,42 @@
             color: red;
         }
 
+        /* Compact display for balanced elements: show only a small percentage bar */
+        .element-balanced {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 16px 0;
+        }
+
+        .element-balanced .element-perc {
+            font-weight: 600;
+            color: #333;
+            width: 36px;
+            text-align: right;
+        }
+
+        .perc-bar {
+            flex: 1;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .perc-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3EACA8, #3E8CA8);
+            border-radius: 6px;
+            width: 0%;
+        }
+
         /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
-            font-size: 12px;
+            font-size: 11pt;
         }
 
         th,
@@ -338,11 +390,14 @@
         {% for el_name in ['Fire', 'Air', 'Water', 'Earth'] %}
         {% set el_data = ea.get(el_name, {}) %}
 
+        {# If element is Balanced we omit the full name/details but still print percentage compactly #}
+        {% set percent = ep.get(el_name, 0) %}
+        {% set status = el_data.get('Status', 'Balanced') %}
+        {% if status != 'Balanced' %}
         <h2>The {{ el_name }} Element</h2>
 
         {# Extract content #}
         {# Logic to handle nested structure from fixed JSONs (e.g. {'air': {'low': {...}}}) #}
-        {% set status = el_data.get('Status', 'Balanced') %}
         {% set nested_content = el_data.get(el_name.lower()) %}
         {% set content_raw = '' %}
 
@@ -365,28 +420,35 @@
         '' %}
         {% set scientific = content_raw.get('Scientific Correlation') or '' %}
 
-        {% set imb_list = [] %}
-        {# Fire/Earth keys #}
-        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back') %}{% set _ =
-        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back')) %}{% endif %}
-        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You') %}{% set _ =
-        imb_list.append(content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You')) %}{% endif %}
-        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In') %}{% set _ =
-        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In')) %}{%
-        endif %}
-        {% if content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up') %}{% set _ =
-        imb_list.append(content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up')) %}{%
-        endif %}
+        {% set imbalance_title = '' %}
+        {% set imbalance = '' %}
 
-        {# Air/Water keys #}
-        {% if content_raw.get('Low ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Low ' + el_name)) %}{%
-        endif %}
-        {% if content_raw.get('Excess ' + el_name) %}{% set _ = imb_list.append(content_raw.get('Excess ' + el_name))
-        %}{% endif %}
-
-        {% if content_raw.get('Imbalance Effects') %}{% set _ = imb_list.append(content_raw.get('Imbalance Effects'))
-        %}{% endif %}
-        {% set imbalance = imb_list|join('<br><br>') %}
+        {# Check for specific imbalance keys first #}
+        {% if content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back') %}
+        {% set imbalance_title = 'What Low ' + el_name + ' Feels Like—and How It Holds You Back' %}
+        {% set imbalance = content_raw.get('What Low ' + el_name + ' Feels Like—and How It Holds You Back') %}
+        {% elif content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You') %}
+        {% set imbalance_title = 'What Low ' + el_name + ' Feels Like—and How It Scatters You' %}
+        {% set imbalance = content_raw.get('What Low ' + el_name + ' Feels Like—and How It Scatters You') %}
+        {% elif content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In') %}
+        {% set imbalance_title = 'What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In' %}
+        {% set imbalance = content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Rein It In') %}
+        {% elif content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up') %}
+        {% set imbalance_title = 'What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up' %}
+        {% set imbalance = content_raw.get('What Excess ' + el_name + ' Feels Like—and Why It\'s Time to Lighten Up') %}
+        {% elif content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Dry Out') %}
+        {% set imbalance_title = 'What Excess ' + el_name + ' Feels Like—and Why You Need to Dry Out' %}
+        {% set imbalance = content_raw.get('What Excess ' + el_name + ' Feels Like—and Why You Need to Dry Out') %}
+        {% elif content_raw.get('Low ' + el_name) %}
+        {% set imbalance_title = 'Low ' + el_name %}
+        {% set imbalance = content_raw.get('Low ' + el_name) %}
+        {% elif content_raw.get('Excess ' + el_name) %}
+        {% set imbalance_title = 'Excess ' + el_name %}
+        {% set imbalance = content_raw.get('Excess ' + el_name) %}
+        {% elif content_raw.get('Imbalance Effects') %}
+        {% set imbalance_title = 'Imbalance Effects' %}
+        {% set imbalance = content_raw.get('Imbalance Effects') %}
+        {% endif %}
 
         {% set diet = content_raw.get('Diet') or '' %}
         {% set lifestyle = content_raw.get('Lifestyle and Exercise') or content_raw.get('Lifestyle and Exercise
@@ -434,7 +496,7 @@
         {% endif %}
 
         {% if imbalance %}
-        <h3>Imbalance Effects</h3>
+        <h3>{{ imbalance_title }}</h3>
         <p>{{ imbalance | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
         {% endif %}
 
@@ -498,6 +560,12 @@
         <p>{{ value | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
         {% endif %}
         {% endfor %}
+        {% endif %}
+        {% else %}
+        {# Balanced element: show compact percentage only (no name/details) #}
+        <div class="element-balanced">
+            <div class="element-perc">{{ percent }}%</div>
+        </div>
         {% endif %}
         {% endfor %}
     </div>

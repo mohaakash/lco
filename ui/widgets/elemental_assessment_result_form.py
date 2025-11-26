@@ -41,7 +41,7 @@ class ElementalAssessmentResultForm(QWidget):
         layout.setSpacing(20)
 
         # Title
-        title = QLabel("Elemental Balance Assessment Results")
+        title = QLabel("Unveil Your Energetic Blueprint")
         title.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -120,7 +120,7 @@ class ElementalAssessmentResultForm(QWidget):
         # Export Menu Button
         from PyQt6.QtWidgets import QMenu
         from PyQt6.QtGui import QAction
-        
+
         self.export_menu_btn = QPushButton("Export Report")
         self.export_menu_btn.setFixedHeight(45)
         self.export_menu_btn.setStyleSheet("""
@@ -140,16 +140,16 @@ class ElementalAssessmentResultForm(QWidget):
                 image: none;
             }
         """)
-        
+
         export_menu = QMenu(self)
         pdf_action = QAction("Export as PDF", self)
         pdf_action.triggered.connect(self.export_pdf)
         word_action = QAction("Export as Word", self)
         word_action.triggered.connect(self.export_word)
-        
+
         export_menu.addAction(pdf_action)
         export_menu.addAction(word_action)
-        
+
         self.export_menu_btn.setMenu(export_menu)
 
         btn_layout.addWidget(back_btn)
@@ -486,11 +486,13 @@ class ElementalAssessmentResultForm(QWidget):
                 classification = ''
                 status = ''
                 percentage = ''
-                
+
                 if isinstance(el_data, dict):
                     # generator shape or mapped shape
-                    title = el_data.get('Title') or el_data.get('Classification') or ''
-                    content = el_data.get('Content') or el_data.get('Description') or ''
+                    title = el_data.get('Title') or el_data.get(
+                        'Classification') or ''
+                    content = el_data.get('Content') or el_data.get(
+                        'Description') or ''
                     classification = el_data.get('Classification', title)
                     status = el_data.get('Status', '')
                     percentage = el_data.get('Percentage', '')
@@ -540,7 +542,7 @@ class ElementalAssessmentResultForm(QWidget):
                 pct = ''
                 title = ''
                 content = ''
-                
+
                 if isinstance(mod_content, dict):
                     pct = mod_content.get('Percentage', '')
                     # Check for nested content dict (from mapped structure)
@@ -560,9 +562,9 @@ class ElementalAssessmentResultForm(QWidget):
                             if k not in ('Percentage', 'Title', 'Content'):
                                 content_lines.append(f"{k}: {v}")
                         if content_lines:
-                             content = "\n\n".join(content_lines)
+                            content = "\n\n".join(content_lines)
                         else:
-                             content = mod_content.get('Content', '')
+                            content = mod_content.get('Content', '')
 
                     title = mod_content.get('Title', '')
                 else:
@@ -717,14 +719,15 @@ class ElementalAssessmentResultForm(QWidget):
             env = Environment(loader=FileSystemLoader(tpl_dir),
                               autoescape=select_autoescape(['html', 'xml']))
             template = env.get_template('report.html')
-            
+
             # Prepare context
             ctx = dict(self.assessment_data or {})
-            ctx.setdefault('report_date', datetime.date.today().strftime("%B %d, %Y"))
-            
+            ctx.setdefault(
+                'report_date', datetime.date.today().strftime("%B %d, %Y"))
+
             # Load images as base64
             import base64
-            
+
             def load_image_b64(filename):
                 try:
                     img_path = Path(os.getcwd()) / 'images' / filename
@@ -740,7 +743,7 @@ class ElementalAssessmentResultForm(QWidget):
             ctx['human_png'] = load_image_b64('human.png')
 
             full_html = template.render(**ctx)
-            
+
             # Emit HTML to parent for PDF generation/preview
             try:
                 self.export_requested.emit(
@@ -789,7 +792,7 @@ class ElementalAssessmentResultForm(QWidget):
             self, "Export Report Word", "", "Word Files (*.docx)")
         if not fname:
             return
-        
+
         try:
             from ui.utils.docx_generator import DocxReportGenerator
             generator = DocxReportGenerator(fname)
@@ -802,11 +805,13 @@ class ElementalAssessmentResultForm(QWidget):
                     data.update(edited)
                 except Exception:
                     pass
-            
+
             generator.generate(data)
-            QMessageBox.information(self, 'Exported', f'Report saved to {fname}')
+            QMessageBox.information(
+                self, 'Exported', f'Report saved to {fname}')
         except Exception as e:
-            QMessageBox.critical(self, 'Export Failed', f'Could not save Word document: {e}')
+            QMessageBox.critical(self, 'Export Failed',
+                                 f'Could not save Word document: {e}')
 
     def get_edited_assessment_data(self):
         """Retrieve all edited data"""
