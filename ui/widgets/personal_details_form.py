@@ -37,7 +37,7 @@ class PersonalDetailsForm(QWidget):
         header_layout = QHBoxLayout()
         
         # Title
-        title_label = QLabel("Elemental Balance Assessment")
+        title_label = QLabel("Your Element Blueprint")
         title_label.setStyleSheet("""
             QLabel {
                 color: #000000;
@@ -68,7 +68,7 @@ class PersonalDetailsForm(QWidget):
         layout.addLayout(header_layout)
 
         # Upload Button
-        upload_btn = QPushButton("Upload planetary Report (PDF)")
+        upload_btn = QPushButton("Upload planetary Positions Report (PDF)")
         upload_btn.setStyleSheet("""
             QPushButton {
                 background-color: #E0F7FA;
@@ -124,7 +124,7 @@ class PersonalDetailsForm(QWidget):
         layout.addLayout(contact_layout)
 
         # Element Percentages Section
-        element_pct_label = QLabel("Your Element Blueprint")
+        element_pct_label = QLabel("Your Elements")
         element_pct_label.setStyleSheet("""
             QLabel {
                 color: #0099CC;
@@ -304,7 +304,7 @@ class PersonalDetailsForm(QWidget):
 
     def _on_upload_clicked(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Planetary Report PDF", "", "PDF Files (*.pdf)"
+            self, "Select Planetary positions", "", "PDF Files (*.pdf)"
         )
         if not file_path:
             return

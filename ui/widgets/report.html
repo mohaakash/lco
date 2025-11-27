@@ -603,17 +603,19 @@
         <h3>{{ ck.replace('_',' ') }}</h3>
         {% if cv is string %}
         {% set lines = cv.split('\n') %}
-        {% for line in lines %}
-        {% if line.strip() %}
-        <p>{{ line.strip() | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        <ul>
+            {% for line in lines %}
+            {% if line.strip() and line.strip() != '' %}
+            <li>{{ line.strip() }}</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>{{ cv }}</p>
         {% endif %}
         {% endfor %}
         {% else %}
-        <p>{{ cv | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
-        {% endif %}
-        {% endfor %}
-        {% else %}
-        <p>{{ content | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        <p>{{ content }}</p>
         {% endif %}
         {% endif %}
         {% endfor %}

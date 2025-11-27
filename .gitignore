@@ -75,6 +75,11 @@ docs/_build/
 # PyBuilder
 target/
 
+*.tar.gz
+*.tar
+*gz
+*.zip
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
