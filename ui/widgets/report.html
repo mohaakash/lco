@@ -495,6 +495,23 @@
         <p>{{ scientific | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
         {% endif %}
 
+        {# Render Physique, Temperament, Body Type BEFORE imbalance sections #}
+        {% if content_raw is mapping %}
+        {% if content_raw.get('Physique') %}
+        <h3>Physique</h3>
+        <p>{{ content_raw.get('Physique') | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        {% endif %}
+        {% if content_raw.get('Temperament') %}
+        <h3>Temperament</h3>
+        <p>{{ content_raw.get('Temperament') | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        {% endif %}
+        {% if content_raw.get('Body Type and Personality') %}
+        <h3>Body Type and Personality</h3>
+        <p>{{ content_raw.get('Body Type and Personality') | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe
+            }}</p>
+        {% endif %}
+        {% endif %}
+
         {% if imbalance %}
         <h3>{{ imbalance_title }}</h3>
         <p>{{ imbalance | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
@@ -535,6 +552,7 @@
         {% set rendered_keys = [
         'The Fire Element', 'The Earth Element', 'The Air Element', 'The Water Element',
         'Description', 'Scientific Correlation',
+        'Physique', 'Temperament', 'Body Type and Personality',
         'What Low ' + el_name + ' Feels Like—and How It Holds You Back',
         'What Low ' + el_name + ' Feels Like—and How It Scatters You',
         'What Low ' + el_name + ' Feels Like—and How It Dries You Out',
