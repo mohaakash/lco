@@ -52,6 +52,34 @@ python main.py
 3.  The application will extract the data and display the Elemental Analysis.
 4.  Click "Generate Report" to create a detailed PDF report with AI-generated insights.
 
+## Docker Deployment (Windows)
+
+For easy deployment on Windows without manual dependency installation:
+
+### Quick Start
+
+1.  **Prerequisites:**
+    *   Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
+    *   Install [VcXsrv X Server](https://sourceforge.net/projects/vcxsrv/) for GUI display
+
+2.  **Run the application:**
+    ```cmd
+    run-windows.bat
+    ```
+
+The batch script will automatically:
+- Check if Docker and VcXsrv are running
+- Build the Docker image (first time only)
+- Start the application
+
+### Detailed Instructions
+
+See [DOCKER_SETUP.md](DOCKER_SETUP.md) for comprehensive Docker setup instructions, including:
+- VcXsrv configuration
+- Troubleshooting guide
+- Manual Docker commands
+- API key configuration
+
 ## Dependencies
 
 *   `PyQt6`: For the Graphical User Interface.
