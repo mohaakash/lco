@@ -68,7 +68,7 @@ class PersonalDetailsForm(QWidget):
         layout.addLayout(header_layout)
 
         # Upload Button
-        upload_btn = QPushButton("Upload planetary Positions Report (PDF)")
+        upload_btn = QPushButton("Upload Planetary Positions Report (PDF)")
         upload_btn.setStyleSheet("""
             QPushButton {
                 background-color: #E0F7FA;

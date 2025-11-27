@@ -283,6 +283,10 @@
             the lungs to supply the different parts of the body, so when weaker areas are not supplied with their
             energy, abnormal function results.</p>
 
+        {% if human_png %}
+        <img src="data:image/png;base64,{{ human_png }}" class="human-img" alt="Human Energy Field" />
+        {% endif %}
+
         <p>Your astral chart reflects your own energy pattern to offer insights into your state of health, pinpoint
             nutritional deficiencies, and gauge your psychological balance.</p>
 
@@ -297,10 +301,11 @@
             preventive measures rather than definitive predictions. Just as one prepares for possible rain by carrying
             an umbrella, understanding one's astrological health indicators facilitates proactive healthcare strategies
             aimed at prevention.</p>
-
+        <!--
         {% if human_png %}
         <img src="data:image/png;base64,{{ human_png }}" class="human-img" alt="Human Energy Field" />
         {% endif %}
+        -->
     </div>
 
     <div class="page-break"></div>
