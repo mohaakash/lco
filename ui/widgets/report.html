@@ -100,7 +100,7 @@
 
         /* Typography */
         h1 {
-            font-size: 18pt;
+            font-size: 22pt;
             color: darkblue;
             font-weight: bold;
             margin-top: 20px;
@@ -199,7 +199,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
-            font-size: 11pt;
+            font-size: 12pt;
         }
 
         th,
@@ -577,19 +577,23 @@
         <h1>Your Daily Plan to Restore Balance</h1>
         {% set dg = Daily_Routine if (Daily_Routine is defined) else (Daily_Guideline if (Daily_Guideline is defined)
         else {}) %}
-
         {% for period, content in dg.items() %}
         {% if content and period not in ['__parse_error', '__error', 'raw', 'error_message'] %}
         <h2>{{ period|replace('_', ' ') }}</h2>
         {% if content is mapping %}
-        <table>
-            {% for ck, cv in content.items() %}
-            <tr>
-                <td width="30%"><strong>{{ ck.replace('_',' ') }}</strong></td>
-                <td>{{ cv | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        {% for ck, cv in content.items() %}
+        <h3>{{ ck.replace('_',' ') }}</h3>
+        {% if cv is string %}
+        {% set lines = cv.split('\n') %}
+        {% for line in lines %}
+        {% if line.strip() %}
+        <p>{{ line.strip() | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <p>{{ cv | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
+        {% endif %}
+        {% endfor %}
         {% else %}
         <p>{{ content | replace('\n\n', '<br><br>') | replace('\n', '<br>') | safe }}</p>
         {% endif %}
