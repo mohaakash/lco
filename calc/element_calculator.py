@@ -185,6 +185,57 @@ def get_quality(sign):
 
 
 # ----------------------------------------------------------
+# 4b. Calculate qualities (modalities) - Count-based method
+# ----------------------------------------------------------
+def calculate_qualities(planets):
+    """Calculate quality distribution using simple count method.
+    
+    Only counts the 7 traditional planets: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn.
+    Does NOT include Ascendant or other points.
+    
+    Args:
+        planets: Dictionary mapping planet names to zodiac signs
+        
+    Returns:
+        tuple: (qualities_dict, percentages_dict)
+            - qualities: Count of planets in each quality
+            - percentages: Percentage distribution (rounded to 2 decimals)
+    """
+    qualities = {
+        "Cardinal": 0,
+        "Fixed": 0,
+        "Mutable": 0
+    }
+
+    cardinal = ["Aries", "Cancer", "Libra", "Capricorn"]
+    fixed = ["Taurus", "Leo", "Scorpio", "Aquarius"]
+    mutable = ["Gemini", "Virgo", "Sagittarius", "Pisces"]
+
+    # Only these planets count: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn
+    quality_planets = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]
+
+    for planet in quality_planets:
+        sign = planets.get(planet)
+        if not sign:
+            continue
+        if sign in cardinal:
+            qualities["Cardinal"] += 1
+        elif sign in fixed:
+            qualities["Fixed"] += 1
+        elif sign in mutable:
+            qualities["Mutable"] += 1
+
+    total = sum(qualities.values())
+
+    percentages = {
+        q: round((v / total) * 100, 2) if total else 0
+        for q, v in qualities.items()
+    }
+
+    return qualities, percentages
+
+
+# ----------------------------------------------------------
 # 5. Calculate elemental distribution
 # ----------------------------------------------------------
 def calculate_elements(planets):
