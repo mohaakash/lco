@@ -239,8 +239,15 @@ def calculate_qualities(planets):
 # 5. Calculate elemental distribution
 # ----------------------------------------------------------
 def calculate_elements(planets):
+    """Calculate element and quality distributions.
+    
+    Elements use weighted point system (includes Asc and ruler bonus).
+    Qualities use count-based system (7 planets only, via calculate_qualities).
+    
+    Returns:
+        tuple: (element_scores, element_percentages, quality_scores, quality_percentages)
+    """
     element_scores = {"Fire": 0, "Water": 0, "Earth": 0, "Air": 0}
-    quality_scores = {"Cardinal": 0, "Fixed": 0, "Mutable": 0}
 
     planet_points = {
         "Sun": 4,
@@ -253,18 +260,14 @@ def calculate_elements(planets):
         "Saturn": 2
     }
 
-    # Add points for planets, ascendant
+    # Add points for planets and ascendant (ELEMENTS ONLY)
     for planet, sign in planets.items():
         if sign:
             element = get_element(sign)
             if element:
                 element_scores[element] += planet_points.get(planet, 0)
-            
-            quality = get_quality(sign)
-            if quality:
-                quality_scores[quality] += planet_points.get(planet, 0)
 
-    # Handle Ruler of Ascendant (extra 2 points)
+    # Handle Ruler of Ascendant (extra 2 points for ELEMENTS ONLY)
     asc_sign = planets.get("Asc")
     if asc_sign:
         ruler = get_ruler_of_asc(asc_sign)
@@ -273,23 +276,16 @@ def calculate_elements(planets):
             ruler_element = get_element(ruler_sign)
             if ruler_element:
                 element_scores[ruler_element] += 2   # +2 points
-            
-            ruler_quality = get_quality(ruler_sign)
-            if ruler_quality:
-                quality_scores[ruler_quality] += 2   # +2 points
 
-    # Convert to percentages
+    # Convert elements to percentages
     total_points = sum(element_scores.values())
     element_percentages = {
         el: round((score / total_points) * 100, 2) if total_points > 0 else 0
         for el, score in element_scores.items()
     }
 
-    total_quality_points = sum(quality_scores.values())
-    quality_percentages = {
-        q: round((score / total_quality_points) * 100, 2) if total_quality_points > 0 else 0
-        for q, score in quality_scores.items()
-    }
+    # Use calculate_qualities() for quality calculation (count-based, 7 planets only)
+    quality_scores, quality_percentages = calculate_qualities(planets)
 
     return element_scores, element_percentages, quality_scores, quality_percentages
 

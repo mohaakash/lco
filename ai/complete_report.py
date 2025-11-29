@@ -532,9 +532,43 @@ def generate_complete_output(user_input, api_key=None) -> dict:
     2. Generates prompts for each element/modality.
     3. Calls Gemini API to get descriptions.
     4. Returns a structured dictionary with all content.
+    
+    Args:
+        user_input: Dictionary with element/quality percentages
+        api_key: Optional API key from GUI settings. If None, empty, or invalid,
+                 falls back to GEMINI_API_KEY from .env file
     """
-    if api_key:
-        genai.configure(api_key=api_key)
+    # Validate and configure API key
+    # Priority: 1) Valid GUI key, 2) .env default key
+    effective_api_key = None
+    
+    # Check if GUI-provided key is valid (not None and not empty/whitespace)
+    if api_key and api_key.strip():
+        effective_api_key = api_key.strip()
+        logger.info("Using API key from GUI settings")
+    else:
+        # Fall back to .env file
+        env_key = os.getenv("GEMINI_API_KEY")
+        if env_key and env_key.strip():
+            effective_api_key = env_key.strip()
+            logger.info("Using API key from .env file (GUI key not set or empty)")
+        else:
+            logger.error("No valid API key found in GUI settings or .env file")
+            return {
+                "__error": True,
+                "error_message": "No valid API key configured. Please set your Gemini API key in Settings or in the .env file."
+            }
+    
+    # Configure genai with the effective API key
+    try:
+        genai.configure(api_key=effective_api_key)
+    except Exception as e:
+        logger.error(f"Failed to configure API key: {e}")
+        return {
+            "__error": True,
+            "error_message": f"Invalid API key configuration: {str(e)}"
+        }
+
     # prepare descriptions and percentages
     element_descriptions = build_descriptions_json(user_input)
     modality_descriptions = build_modality_descriptions(user_input)
